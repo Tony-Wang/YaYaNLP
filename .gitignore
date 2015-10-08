@@ -1,0 +1,6 @@
+*.bin
+*.ya
+*.dat
+*.pyc
+/.idea
+/data
