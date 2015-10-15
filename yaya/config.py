@@ -16,6 +16,15 @@ CUSTOM_DICT_NAME = [os.path.join(DATA_ROOT + "/dictionary/custom/", f) for f in 
 
 CORE_DICT_NAME = os.path.join(DATA_ROOT, "dictionary/CoreNatureDictionary.txt")
 CORE_BIGRAM_NAME = os.path.join(DATA_ROOT, "dictionary/CoreNatureDictionary.ngram.txt")
+CORE_TR_PATH = os.path.join(DATA_ROOT, "dictionary/person/CoreNatureDictionary.tr.txt")
+
 CHAR_TYPE_PATH = os.path.join(DATA_ROOT, "dictionary/other/CharType.dat.yes")
 PERSON_TR_PATH = os.path.join(DATA_ROOT, "dictionary/person/nr.tr.txt")
 PERSON_DICT_NAME = os.path.join(DATA_ROOT, "dictionary/person/nr.txt")
+
+
+# 全局配置
+
+class Config:
+    # 中国人名识别
+    name_recognize = True

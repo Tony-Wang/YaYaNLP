@@ -1,6 +1,6 @@
 # coding=utf-8
 from unittest import TestCase
-from yaya.seg.segment import atom_seg
+from yaya.seg.wordnet import atom_seg
 from yaya.utility.chartype import *
 
 __author__ = 'tony'

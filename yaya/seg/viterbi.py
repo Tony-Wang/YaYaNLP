@@ -1,5 +1,6 @@
 # -*- encoding:utf-8 -*-
 from __future__ import unicode_literals
+import math
 from yaya.const import DOUBLE_MAX
 
 __author__ = 'tony'
@@ -43,21 +44,60 @@ class Viterbi:
         return path[state]
 
 
-def viterbi(word_net):
-    for v in word_net.vertexs[1]:
-        v.update_from(word_net.vertexs[0][0])
-    for i in range(1, word_net.vertexs.__len__() - 1):
-        node_array = word_net.vertexs[i]
+def viterbi(vertexs):
+    for v in vertexs[1]:
+        v.update_from(vertexs[0][0])
+    for i in range(1, vertexs.__len__() - 1):
+        node_array = vertexs[i]
         if node_array is None:
             continue
         for node in node_array:
             if node.vertex_from is None:
                 continue
-            for node_to in word_net.vertexs[i + node.real_word.__len__()]:
+            for node_to in vertexs[i + node.real_word.__len__()]:
                 node_to.update_from(node)
-    vertex_from = word_net.vertexs[-1][0]
+    vertex_from = vertexs[-1][0]
     vertex_list = []
     while vertex_from is not None:
         vertex_list.insert(0, vertex_from)
         vertex_from = vertex_from.vertex_from
     return vertex_list
+
+
+def viterbi_roletag(roletaglist, hmm):
+    _length = len(roletaglist)
+    taglist = []
+    # 得到第一个元素的第一个标签的词性
+    _pre_nature = roletaglist[0].natures()[0][0]
+    _perfect_nature = _pre_nature
+    taglist.append(_pre_nature)
+    for i in xrange(1, _length):
+        perfect_cost = DOUBLE_MAX
+        item = roletaglist[i]
+        for nature, freq in item.natures():
+            _now = hmm.trans_prob[_pre_nature.index][nature.index] - math.log((item.get_nature_frequency(nature)+1e-8) / hmm.get_total_freq(nature))
+            if perfect_cost > _now:
+                perfect_cost = _now
+                _perfect_nature = nature
+        _pre_nature = _perfect_nature
+        taglist.append(_pre_nature)
+    return taglist
+
+def viterbi_template(node_list, hmm, init_cost=DOUBLE_MAX):
+    node_count = len(node_list)
+    taglist = []
+    # 得到第一个元素的第一个标签的词性
+    _pre_vertex = node_list[0].natures()[0][0]
+    _perfect_vertex = _pre_vertex
+    taglist.append(_pre_vertex)
+    for i,cur_node in enumerate(node_list[1:]):
+        perfect_cost = init_cost
+        for vertex, freq in cur_node.natures():
+            _now = hmm.trans_prob[_pre_vertex.index][vertex.index] - math.log((cur_node.get_nature_frequency(vertex)+1e-8) / hmm.get_total_freq(vertex))
+            if perfect_cost > _now:
+                perfect_cost = _now
+                _perfect_vertex = vertex
+        _pre_vertex = _perfect_vertex
+        taglist.append(_pre_vertex)
+    return taglist
+

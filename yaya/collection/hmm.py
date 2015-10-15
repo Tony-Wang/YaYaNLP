@@ -16,8 +16,8 @@ class HMMMatrix:
         self.start_prob = None
         self.trans_prob = None
 
-    def get_total_freq(self, nature_index):
-        return self.total[nature_index]
+    def get_total_freq(self, nature):
+        return self.total[nature.index]
 
     @staticmethod
     def load(filename):
@@ -70,3 +70,9 @@ class HMMMatrix:
 class PersonTranMatrix:
     def __init__(self):
         self.hmm = HMMMatrix.load(config.PERSON_TR_PATH)
+
+
+@singleton
+class CoreDictTranMatrix:
+    def __init__(self):
+        self.hmm = HMMMatrix.load(config.CORE_TR_PATH)

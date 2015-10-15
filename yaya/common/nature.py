@@ -154,3 +154,4 @@ NATURE = Enum(
     "end",  # u"仅用于始",
     "begin"  # u"仅用于终"
 )
+

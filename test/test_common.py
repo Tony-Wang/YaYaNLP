@@ -17,3 +17,10 @@ class TestEnum(TestCase):
         E1 = Enum('a', 'b')
         self.assertTrue(str(E1.b) == 'b')
         self.assertEqual(E1['b'].index, 1)
+
+    def test_demo(self):
+        # char => int
+        E1 = Enum('a', 'b')
+        self.assertTrue(str(E1.b) == 'b')
+        self.assertEqual(E1['b'].index, 1)
+        self.assertTrue(str(E1[1]) == 'b' )

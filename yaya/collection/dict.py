@@ -16,29 +16,40 @@ class Attribute:
     def __init__(self, attr, cls=NATURE):
         self.cls = cls
         self.attr = attr if isinstance(attr, list) else attr.split(' ')
-        self.nature = {}
+        self._nature = {}
         self.total = 0
         for i in range(1, self.attr.__len__(), 2):
             # self.nature[self.attr[i]] = int(self.attr[i + 1])
-            self.nature[cls[self.attr[i]].index] = int(self.attr[i + 1])
+            self._nature[cls[self.attr[i]]] = int(self.attr[i + 1])
             self.total += int(self.attr[i + 1])
 
+    def to_tuple(self):
+        return tuple(self.attr)
+
+    def __str__(self):
+        return ' '.join(self.attr)
+
     def get_nature_frequency(self, nature):
-        if isinstance(nature, str):
-            nature = self.cls[nature].index
-        if nature not in self.nature:
+        # if isinstance(nature, str) or isinstance(nature, unicode):
+        #     nature = self.cls[nature].index
+        if nature not in self._nature:
             return 0
         else:
-            return self.nature[nature]
+            return self._nature[nature]
 
-    @staticmethod
-    def to_tuple(attr):
-        attr_list = attr.split(' ')
-        return tuple([(attr_list[i], [attr_list[i + 1]]) for i in range(1, attr_list.__len__(), 2)])
+    def natures(self):
+        return self._nature.items()
+
+
+    # @staticmethod
+    # def to_tuple(attr):
+    #     attr_list = attr.split(' ')
+    #     return tuple([(attr_list[i], [attr_list[i + 1]]) for i in range(1, attr_list.__len__(), 2)])
 
     @property
     def total_frequency(self):
         return self.total
+
 
 
 class DoubleArrayTrie:
@@ -186,10 +197,10 @@ class DoubleArrayTrie:
         self.length = length
         self.keySize = keysize if keysize is not None else key.__len__()
         self.value = value
-        self.v = v
+        self.v = v if v is not None else key
         self.progress = 0
 
-        self.resize(65536)
+        self.resize(65536*32)
 
         self.base[0] = 1
         self.next_check_pos = 0
@@ -205,43 +216,8 @@ class DoubleArrayTrie:
 
         return self.error_
 
-    # public void open(String fileName) throws IOException {
-    #     File file = new File(fileName);
-    #     size = (int) file.length() / UNIT_SIZE;
-    #     check = new int[size];
-    #     base = new int[size];
-    #
-    #     DataInputStream is = null;
-    #     try {
-    #         is = new DataInputStream(new BufferedInputStream(
-    #                 new FileInputStream(file), BUF_SIZE));
-    #         for (int i = 0; i < size; i++) {
-    #             base[i] = is.readInt();
-    #             check[i] = is.readInt();
-    #         }
-    #     } finally {
-    #         if (is != null)
-    #             is.close();
-    #     }
-    # }
-    #
-    # public void save(String fileName) throws IOException {
-    #     DataOutputStream out = null;
-    #     try {
-    #         out = new DataOutputStream(new BufferedOutputStream(
-    #                 new FileOutputStream(fileName)));
-    #         for (int i = 0; i < size; i++) {
-    #             out.writeInt(base[i]);
-    #             out.writeInt(check[i]);
-    #         }
-    #         out.close();
-    #     } finally {
-    #         if (out != null)
-    #             out.close();
-    #     }
-    # }
-
-    def exact_match_search(self, key=None, pos=0, keylen=0, nodepos=0):
+    def exact_match_search(self, key, pos=0, keylen=0, nodepos=0):
+        if key is None: return -1
         if keylen <= 0:
             keylen = key.__len__()
         if nodepos <= 0:
@@ -271,58 +247,8 @@ class DoubleArrayTrie:
         else:
             return index, None
 
-    # def get_term_attribute(self, word):
-    #     index, value = self.get(word)
-    #     if value is not None:
-    #         return Attribute(value)
-
-    # public List<Integer> commonPrefixSearch(String key) {
-    #     return commonPrefixSearch(key, 0, 0, 0);
-    # }
-    #
-    # public List<Integer> commonPrefixSearch(String key, int pos, int len,
-    #         int nodePos) {
-    #     if (len <= 0)
-    #         len = key.length();
-    #     if (nodePos <= 0)
-    #         nodePos = 0;
-    #
-    #     List<Integer> result = new ArrayList<Integer>();
-    #
-    #     char[] keyChars = key.toCharArray();
-    #
-    #     int b = base[nodePos];
-    #     int n;
-    #     int p;
-    #
-    #     for (int i = pos; i < len; i++) {
-    #         p = b;
-    #         n = base[p];
-    #
-    #         if (b == check[p] && n < 0) {
-    #             result.add(-n - 1);
-    #         }
-    #
-    #         p = b + (int) (keyChars[i]) + 1;
-    #         if (b == check[p])
-    #             b = base[p];
-    #         else
-    #             return result;
-    #     }
-    #
-    #     p = b;
-    #     n = base[p];
-    #
-    #     if (b == check[p] && n < 0) {
-    #         result.add(-n - 1);
-    #     }
-    #
-    #     return result;
-    # }
-
     def transition(self, path, state_from):
         b = state_from
-
         for i in range(len(path)):
             p = b + ord(path[i]) + 1
             if b == self.check[p]:
@@ -377,7 +303,7 @@ class DoubleArrayTrie:
 
         flist.sort()
         for i in flist:
-            item = i.split(' ')
+            item = i.strip('\n').split(' ')
             k.append(item[0])
             v.append(item)
 
@@ -405,7 +331,7 @@ class DoubleArrayTrie:
 
 
 class Searcher:
-    def __init__(self, trie, chararray, offset):
+    def __init__(self, trie, chararray, offset=0):
         #  key的起点
         self.begin = 0
 
@@ -466,7 +392,6 @@ class Searcher:
                     break
                 b = self.trie.base[0]
                 continue
-
             p = b
             n = self.trie.base[p]
             if b == self.trie.check[p] and n < 0:  # base[p] == check[p] && base[p] < 0 查到一个词
@@ -474,7 +399,6 @@ class Searcher:
                 self.index = -n - 1
                 self.value = self.trie.v[self.index]
                 self.last = b
-                # self.i += 1
                 return True
         return False
 
