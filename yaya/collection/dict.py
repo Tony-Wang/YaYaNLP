@@ -18,6 +18,7 @@ class Attribute:
         self.attr = attr if isinstance(attr, list) else attr.split(' ')
         self._nature = {}
         self.total = 0
+        self.real_word = self.attr[0]
         for i in range(1, self.attr.__len__(), 2):
             # self.nature[self.attr[i]] = int(self.attr[i + 1])
             self._nature[cls[self.attr[i]]] = int(self.attr[i + 1])

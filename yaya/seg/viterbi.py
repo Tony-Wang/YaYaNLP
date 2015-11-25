@@ -1,6 +1,7 @@
 # -*- encoding:utf-8 -*-
 from __future__ import unicode_literals
 import math
+
 from yaya.const import DOUBLE_MAX
 
 __author__ = 'tony'
@@ -54,7 +55,7 @@ def viterbi(vertexs):
         for node in node_array:
             if node.vertex_from is None:
                 continue
-            for node_to in vertexs[i + node.real_word.__len__()]:
+            for node_to in vertexs[i + len(node.real_word)]:
                 node_to.update_from(node)
     vertex_from = vertexs[-1][0]
     vertex_list = []
@@ -62,7 +63,6 @@ def viterbi(vertexs):
         vertex_list.insert(0, vertex_from)
         vertex_from = vertex_from.vertex_from
     return vertex_list
-
 
 def viterbi_roletag(roletaglist, hmm):
     _length = len(roletaglist)

@@ -1,10 +1,10 @@
 # -*- coding:utf-8 -*-
 from __future__ import absolute_import, unicode_literals
 from unittest import TestCase
+
 from yaya.collection.dict import *
-from yaya.common.nr import NRPattern
 import yaya.config
-from yaya.dictionary.person_dict import PersonDict, NRPatternDict
+from yaya.dictionary.person_dict import PersonDict
 
 __author__ = 'tony'
 
@@ -60,7 +60,7 @@ class TestDoubleArrayTrie(TestCase):
 
     def test_max_match(self):
         text = "AABBCD"
-        # NRPatternDict.trie.max_match()
+
 
 class TestAttribute(TestCase):
     def test_total_freq(self):

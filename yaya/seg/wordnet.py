@@ -1,9 +1,12 @@
 # coding=utf-8
 from __future__ import absolute_import
-from ..collection.dict import CoreDict
+import math
+
+from ..collection.dict import CoreDict, Attribute, CustomDict
 from ..common.nature import NATURE
-from ..seg.segment import *
 from ..utility.chartype import *
+from yaya.collection.bigram import CoreBiGramTable
+from yaya.const import TAG_BIGIN, TAG_END, SMOOTHING_PARAM, SMOOTHING_FACTOR, MAX_FREQUENCY, TAG_NUMBER, TAG_CLUSTER
 
 __author__ = 'tony'
 
@@ -23,21 +26,13 @@ class Vertex:
         if kwargs.has_key('attribute'):
             attribute = kwargs.get('attribute')
             self.attribute = attribute if isinstance(attribute, Attribute) else Attribute(attribute)
-            # self.word = self.attribute.attr[0]
-            # self.nature = self.attribute.nature
 
         self.word_id = kwargs.get('word_id', -1)
         word = kwargs.get('word')
-        self.real_word = kwargs.get('real_word')
         self.word = word if word is not None else self.real_word
         self.word_id = kwargs.get('word_id')
         self.vertex_from = None
         self.weight = 0
-
-        self.nature = kwargs.get('nature', None)
-        if self.nature is None and self.attribute._nature.__len__() != 0:
-            self.nature = self.attribute._nature.items()[0][0]
-
 
     def __unicode__(self):
         return self.real_word
@@ -45,14 +40,25 @@ class Vertex:
     def __str__(self):
         return "%s/%s"%(self.real_word,self.word)
 
-    # @property
-    # def nature(self):
-    #     if self._nature is not None:
-    #         return self._nature
-    #     if self.attribute._nature.__len__() != 0:
-    #         return self.attribute._nature.items()[0][0]
-    #     else:
-    #         return None
+    def __eq__(self, other):
+        if type(self) != type(other):
+            return False
+        return self.real_word == other.real_word and self.nature == other.nature
+
+    @property
+    def nature(self):
+        if self.attribute._nature.__len__() != 0:
+            return self.attribute._nature.items()[0][0]
+        else:
+            return None
+
+    @property
+    def real_word(self):
+        return self.attribute.real_word
+
+    @nature.setter
+    def nature(self, value):
+        self.attribute._nature.items()[0][0] = value
 
     def update_from(self, vertex_from):
         weight = vertex_from.weight + Vertex.calc_wight(vertex_from, self)
@@ -201,10 +207,9 @@ def gen_word_net(text, word_net):
 def new_tag_vertex(tag):
     word_id, attribute = CoreDict().trie.get(tag)
     if word_id > 0:
-        return Vertex(word=tag,
-                      real_word=chr(32),
-                      attribute=attribute,
-                      word_id=word_id)
+        vertex = Vertex(attribute=attribute, word=tag, word_id=word_id)
+        vertex.attribute.real_word = chr(32)
+        return vertex
     else:
         logger.error(u"从核心字典加载%s信息时出错", tag)
         import sys

@@ -1,8 +1,10 @@
 # coding=utf-8
 from __future__ import unicode_literals
 import math
+
 from yaya import config
 from yaya.common.nr import NR
+from yaya.common.nt import NT
 from yaya.utility.singleton import singleton
 
 __author__ = 'tony'
@@ -20,14 +22,14 @@ class HMMMatrix:
         return self.total[nature.index]
 
     @staticmethod
-    def load(filename):
+    def load(filename, cls):
         with open(filename, 'r') as f:
             flist = f.read().splitlines()
         labels = flist[0].split(',')[1:]
         ord_array = [[0]] * len(labels)
         ord_max = 0
         for i in range(len(ord_array)):
-            ord_array[i] = NR[labels[i]].index
+            ord_array[i] = cls[labels[i]].index
             ord_max = max(ord_max, ord_array[i])
         # 找到最大的枚举值
         ord_max += 1
@@ -35,7 +37,7 @@ class HMMMatrix:
         hmm.matrix = [[0 for col in range(ord_max)] for row in range(ord_max)]
         for row in flist[1:]:
             params = row.split(',')
-            cur_ord = NR[params[0]].index
+            cur_ord = cls[params[0]].index
             for i in range(ord_array.__len__()):
                 hmm.matrix[cur_ord][ord_array[i]] = int(params[1 + i])
 
@@ -69,10 +71,19 @@ class HMMMatrix:
 @singleton
 class PersonTranMatrix:
     def __init__(self):
-        self.hmm = HMMMatrix.load(config.PERSON_TR_PATH)
+        self.hmm = HMMMatrix.load(config.PERSON_TR_PATH, NR)
 
 
 @singleton
-class CoreDictTranMatrix:
+class OrgTranMatrix:
     def __init__(self):
-        self.hmm = HMMMatrix.load(config.CORE_TR_PATH)
+        self.hmm = HMMMatrix.load(config.ORG_TR_PATH, NT)
+
+@singleton
+class PlaceTranMatrix:
+    def __init__(self):
+        self.hmm = HMMMatrix.load(config.ORG_TR_PATH, NS)
+        # @singleton
+        # class CoreDictTranMatrix:
+        #     def __init__(self):
+        #         self.hmm = HMMMatrix.load(config.CORE_TR_PATH)

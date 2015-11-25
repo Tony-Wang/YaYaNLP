@@ -19,12 +19,25 @@ CORE_BIGRAM_NAME = os.path.join(DATA_ROOT, "dictionary/CoreNatureDictionary.ngra
 CORE_TR_PATH = os.path.join(DATA_ROOT, "dictionary/person/CoreNatureDictionary.tr.txt")
 
 CHAR_TYPE_PATH = os.path.join(DATA_ROOT, "dictionary/other/CharType.dat.yes")
+
 PERSON_TR_PATH = os.path.join(DATA_ROOT, "dictionary/person/nr.tr.txt")
 PERSON_DICT_NAME = os.path.join(DATA_ROOT, "dictionary/person/nr.txt")
 
+ORG_TR_PATH = os.path.join(DATA_ROOT, "dictionary/organization/nt.tr.txt")
+ORG_DICT_NAME = os.path.join(DATA_ROOT, "dictionary/organization/nt.txt")
+
+PLACE_TR_PATH = os.path.join(DATA_ROOT, "dictionary/place/ns.tr.txt")
+PLACE_DICT_NAME = os.path.join(DATA_ROOT, "dictionary/place/ns.txt")
+
 
 # 全局配置
-
-class Config:
+class _Config:
     # 中国人名识别
     name_recognize = True
+    # 地名识别
+    place_recognize = True
+
+    debug = False
+
+
+Config = _Config()
