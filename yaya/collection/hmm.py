@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 import math
 
+from common.ns import NS
 from yaya import config
 from yaya.common.nr import NR
 from yaya.common.nt import NT
@@ -82,8 +83,4 @@ class OrgTranMatrix:
 @singleton
 class PlaceTranMatrix:
     def __init__(self):
-        self.hmm = HMMMatrix.load(config.ORG_TR_PATH, NS)
-        # @singleton
-        # class CoreDictTranMatrix:
-        #     def __init__(self):
-        #         self.hmm = HMMMatrix.load(config.CORE_TR_PATH)
+        self.hmm = HMMMatrix.load(config.PLACE_TR_PATH, NS)

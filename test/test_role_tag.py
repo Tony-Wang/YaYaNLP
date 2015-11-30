@@ -5,7 +5,7 @@ from yaya.collection.dict import Attribute, DoubleArrayTrie
 from yaya.collection.hmm import PersonTranMatrix
 from yaya.common.nr import NR, NRPattern
 from yaya.const import *
-from yaya.recognition.nr.persion_recognition import role_tag
+from yaya.recognition.persion_recognition import role_tag
 from yaya.seg.viterbi import viterbi_roletag
 from yaya.seg.wordnet import new_tag_vertex, Vertex
 
@@ -16,15 +16,15 @@ class TestRole_tag(TestCase):
     def test_role_tag(self):
         word_seg_list = [
             new_tag_vertex(TAG_BIGIN),
-            Vertex(attribute=Attribute(u'秦 n 1')),
-            Vertex(attribute=Attribute(u'光荣 n 1')),
-            Vertex(attribute=Attribute(u'同志 n 1')),
+            Vertex(u"秦", attribute=Attribute(u'n 1')),
+            Vertex(u"光荣", attribute=Attribute(u'n 1')),
+            Vertex(u"同志", attribute=Attribute(u'n 1')),
             new_tag_vertex(TAG_END),
         ]
         taglist = role_tag(word_seg_list)
 
         self.assertTrue(isinstance(taglist, list))
-        self.assertEqual(taglist[2].to_tuple(), (u'光荣', u'Z', u'29', u'L', u'2'))
+        self.assertEqual(taglist[2].to_tuple(), (u'Z', u'29', u'L', u'2'))
 
         tag_index_list = viterbi_roletag(taglist, PersonTranMatrix().hmm)
         self.assertEqual(tag_index_list[0], NR.A, u"人名识别，第一个标识应该为TAG_BAGIN")

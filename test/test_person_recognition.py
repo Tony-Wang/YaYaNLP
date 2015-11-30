@@ -3,7 +3,7 @@ from unittest import TestCase
 
 from yaya.seg.viterbi import viterbi
 from yaya.seg.wordnet import WordNet, gen_word_net, Vertex
-from yaya.recognition.nr import persion_recognition
+from yaya.recognition import persion_recognition
 
 __author__ = 'tony'
 
@@ -17,8 +17,9 @@ class TestPersonRecognition(TestCase):
         # 维特比
         vertexs = viterbi(word_net.vertexs)
         word_net_optimum = WordNet(text, vertexs=vertexs)
-        vertexs = persion_recognition.recognition(vertexs, word_net_optimum, word_net)
-        self.assertIn(Vertex(attribute=u"秦光荣 nr 1"), vertexs)
-        self.assertIn(Vertex(attribute=u"李纪恒 nr 1"), vertexs)
-        self.assertIn(Vertex(attribute=u"仇和 nr 1"), vertexs)
-        self.assertIn(Vertex(attribute=u"王春桂 nr 1"), vertexs)
+        persion_recognition.recognition(vertexs, word_net_optimum, word_net)
+        vertexs = viterbi(word_net_optimum.vertexs)
+        self.assertIn(Vertex(u"秦光荣", attribute=u"nr 1"), vertexs)
+        self.assertIn(Vertex(u"李纪恒", attribute=u"nr 1"), vertexs)
+        self.assertIn(Vertex(u"仇和", attribute=u"nr 1"), vertexs)
+        self.assertIn(Vertex(u"王春桂", attribute=u"nr 1"), vertexs)

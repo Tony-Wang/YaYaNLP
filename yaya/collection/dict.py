@@ -1,6 +1,9 @@
 # -*- coding:utf-8 -*-
-from .. import config
-from ..utility.singleton import singleton
+from collections import OrderedDict
+
+from const import *
+from yaya import config
+from yaya.utility.singleton import singleton
 from yaya.common.nature import NATURE
 
 
@@ -18,8 +21,8 @@ class Attribute:
         self.attr = attr if isinstance(attr, list) else attr.split(' ')
         self._nature = {}
         self.total = 0
-        self.real_word = self.attr[0]
-        for i in range(1, self.attr.__len__(), 2):
+        # self.real_word = self.attr[0]
+        for i in range(0, self.attr.__len__(), 2):
             # self.nature[self.attr[i]] = int(self.attr[i + 1])
             self._nature[cls[self.attr[i]]] = int(self.attr[i + 1])
             self.total += int(self.attr[i + 1])
@@ -38,19 +41,24 @@ class Attribute:
         else:
             return self._nature[nature]
 
+    @property
     def natures(self):
         return self._nature.items()
 
+    @property
+    def nature(self):
+        if self._nature.__len__() != 0:
+            return self._nature.items()[0][0]
+        else:
+            return None
 
-    # @staticmethod
-    # def to_tuple(attr):
-    #     attr_list = attr.split(' ')
-    #     return tuple([(attr_list[i], [attr_list[i + 1]]) for i in range(1, attr_list.__len__(), 2)])
+    @nature.setter
+    def nature(self, value):
+        self._nature.items()[0][0] = value
 
     @property
     def total_frequency(self):
         return self.total
-
 
 
 class DoubleArrayTrie:
@@ -190,18 +198,18 @@ class DoubleArrayTrie:
 
         return begin
 
-    def build(self, key=None, length=None, value=None, keysize=None, v=None):
+    def build(self, key=None, length=None, keysize=None, v=None):
         if keysize > key.__len__() or key is None:
             return 0
 
         self.key = key
         self.length = length
         self.keySize = keysize if keysize is not None else key.__len__()
-        self.value = value
+        self.value = None
         self.v = v if v is not None else key
         self.progress = 0
 
-        self.resize(65536*32)
+        self.resize(65536 * 32)
 
         self.base[0] = 1
         self.next_check_pos = 0
@@ -218,7 +226,8 @@ class DoubleArrayTrie:
         return self.error_
 
     def exact_match_search(self, key, pos=0, keylen=0, nodepos=0):
-        if key is None: return -1
+        if key is None:
+            return -1
         if keylen <= 0:
             keylen = key.__len__()
         if nodepos <= 0:
@@ -292,7 +301,7 @@ class DoubleArrayTrie:
             return trie
 
     @staticmethod
-    def load_dict(filenames):
+    def load_dict(filenames, key=None, value=None):
         import codecs
         k, v, flist = [], [], []
         if not isinstance(filenames, list):
@@ -300,96 +309,90 @@ class DoubleArrayTrie:
 
         for filename in filenames:
             with codecs.open(filename, 'r', 'utf-8') as f:
-                flist += f.readlines()
+                flist += f.read().splitlines()
+        key = key or (lambda i: i.split()[0])
+        value = value or (lambda i: i)
 
-        flist.sort()
+        # sort
+        dict_map = {}
         for i in flist:
-            item = i.strip('\n').split(' ')
-            k.append(item[0])
-            v.append(item)
-
+            dict_map[key(i)] = value(i).split()  # 此处需要解开成列表，viterbi会直接用到
+        # for i in flist:
+        #     k.append(key(i))
+        #     v.append(value(i))
+        # k
+        dict_map = OrderedDict(sorted(dict_map.items()))
         trie = DoubleArrayTrie()
-        trie.build(key=k, v=v)
+        trie.build(key=dict_map.keys(), v=dict_map.values())
         return trie
 
-    @staticmethod
-    def load(filenames):
-        import os
-        # 考虑用户自定义宝典输入为列表的情况
-        filename = filenames[0] if type(filenames) is list else filenames
-        if os.path.exists(filename + config.DICT_BIN_EXT):
-            return DoubleArrayTrie.load_bin(filename + config.DICT_BIN_EXT)
-        trie = DoubleArrayTrie.load_dict(filenames)
-        DoubleArrayTrie.save_bin(trie, filename + config.DICT_BIN_EXT)
-        return trie
-
-    def search(self, key, offset):
+    def search(self, key, offset=0):
         return Searcher(self, key, offset)
 
     @staticmethod
-    def searcher(key, offset=0):
+    def load(filenames, keyfunc=None, valuefunc=None, dict_bin_ext=config.DICT_BIN_EXT):
+        import os
+        # 考虑用户自定义宝典输入为列表的情况
+        filename = filenames[0] if type(filenames) is list else filenames
+        if not config.Config.debug and os.path.exists(filename + dict_bin_ext):
+            return DoubleArrayTrie.load_bin(filename + dict_bin_ext)
+        trie = DoubleArrayTrie.load_dict(filenames, keyfunc, valuefunc)
+        DoubleArrayTrie.save_bin(trie, filename + dict_bin_ext)
+        return trie
+
+    @staticmethod
+    def buildcoredictsearcher(key, offset=0):
         return DoubleArrayTrie().load(config.CORE_DICT_NAME).search(key, offset)
 
 
 class Searcher:
     def __init__(self, trie, chararray, offset=0):
-        #  key的起点
+        # key的起点
         self.begin = 0
-
         # key的长度
-
         self.length = 0
-
         # key的字典序坐标
-
         self.index = 0
+        self.key = None
 
         # key对应的value
-
         self.value = None
 
         # 传入的字符数组
-
-        self.code_array = [ord(c) for c in chararray]
+        self.codearray = [ord(c) for c in chararray]
+        self.chararray = chararray
 
         # 上一个node位置
-
         self.trie = trie
-
         self.last = trie.base[0]
 
-        # 上一个字符的下标
-
-        self.i = offset - 1
-
         # charArray的长度，效率起见，开个变量
+        self.arraylength = chararray.__len__()
 
-        self.arrayLength = chararray.__len__()
-
+        # 上一个字符的下标
+        self.i = offset - 1
         # // A trick，如果文本长度为0的话，调用next()时，会带来越界的问题。
-        # // 所以我要在第一次调用next()的时候触发begin == arrayLength进而返回false。
-        # // 当然也可以改成begin >= arrayLength，不过我觉得操作符>=的效率低于==
-        self.begin = -1 if (self.arrayLength is 0) else offset
+        self.begin = -1 if (self.arraylength is 0) else offset
 
     # 是否命中，当返回false表示搜索结束，否则使用公开的成员读取命中的详细信息
     def next(self):
         b = self.last
         while 1:
             self.i += 1
-            if self.i == self.arrayLength:  # 指针到头了，将起点往前挪一个，重新开始，状态归零
+            if self.i == self.arraylength:  # 指针到头了，将起点往前挪一个，重新开始，状态归零
                 self.begin += 1
-                if self.begin == self.arrayLength:
+                if self.begin == self.arraylength:
                     break
                 self.i = self.begin
                 b = self.trie.base[0]
 
-            p = b + self.code_array[self.i] + 1  # 状态转移 p = base[char[i-1]] + char[i] + 1
+            p = b + self.codearray[self.i] + 1  # 状态转移 p = base[char[i-1]] + char[i] + 1
             if b == self.trie.check[p]:  # base[char[i-1]] == check[base[char[i-1]] + char[i] + 1]
                 b = self.trie.base[p]  # 转移成功
             else:
                 self.i = self.begin  # 转移失败，也将起点往前挪一个，重新开始，状态归零
                 self.begin += 1
-                if self.begin is self.arrayLength:
+                if self.begin is self.arraylength:
                     break
                 b = self.trie.base[0]
                 continue
@@ -398,10 +401,83 @@ class Searcher:
             if b == self.trie.check[p] and n < 0:  # base[p] == check[p] && base[p] < 0 查到一个词
                 self.length = self.i - self.begin + 1
                 self.index = -n - 1
+                self.key = self.chararray[self.begin:self.begin + self.length]
                 self.value = self.trie.v[self.index]
                 self.last = b
                 return True
         return False
+
+    def search_all_words(self):
+        b = self.last
+        while 1:
+            self.i += 1
+            if self.i == self.arraylength:  # 指针到头了，将起点往前挪一个，重新开始，状态归零
+                self.begin += 1
+                if self.begin == self.arraylength:
+                    break
+                self.i = self.begin
+                b = self.trie.base[0]
+
+            p = b + self.codearray[self.i] + 1  # 状态转移 p = base[char[i-1]] + char[i] + 1
+            if b == self.trie.check[p]:  # base[char[i-1]] == check[base[char[i-1]] + char[i] + 1]
+                b = self.trie.base[p]  # 转移成功
+            else:
+                self.i = self.begin  # 转移失败，也将起点往前挪一个，重新开始，状态归零
+                self.begin += 1
+                if self.begin is self.arraylength:
+                    break
+                b = self.trie.base[0]
+                continue
+            p = b
+            n = self.trie.base[p]
+            if b == self.trie.check[p] and n < 0:  # base[p] == check[p] && base[p] < 0 查到一个词
+                self.length = self.i - self.begin + 1
+                self.index = -n - 1
+                self.key = self.chararray[self.begin:self.begin + self.length]
+                self.value = self.trie.v[self.index]
+                self.last = b
+                yield self.begin, self.key, self.value
+        return
+
+
+
+
+        # def seek(self,index):
+        #     self.i = index -1
+        #     self.begin = index
+        #     self.last = self.trie.base[0]
+
+
+# class MaxSearcher:
+#     def __init__(self, trie, chararray, offset=0):
+#         self.searcher = trie.search(chararray)
+#         self.textbegin = 0
+#         self.textend = 0
+#
+#     def next(self):
+#         prekey = None
+#         preindex = None
+#         prebegin = None
+#         preend = None
+#
+#         while self.searcher.next():
+#             if prekey == None or prekey == self.searcher.key[:len(prekey)] :
+#                 prekey = self.searcher.key
+#                 preindex = self.searcher.index
+#                 prebegin = self.searcher.begin
+#                 preend = self.searcher.begin+self.searcher.length
+#                 continue
+#             else:
+#                 self.key = prekey
+#                 self.value = self.searcher.trie.v[preindex]
+#                 self.textbegin = prebegin
+#                 self.textend = preend
+#                 # 需要将起点移到找到的词的后一个
+#                 self.searcher.seek(self.textend)
+#                 return True
+#         return False
+
+
 
 
 @singleton
@@ -409,6 +485,24 @@ class CoreDict:
     def __init__(self):
         self.trie = DoubleArrayTrie.load(config.CORE_DICT_NAME)
 
+
+def __split_id_attribute(item):
+    index = item[0]
+    value = item[1]
+    if isinstance(value, str):
+        value = value.split()
+    if isinstance(value, list):
+        value = value[1:]
+    return index, value
+
+
+PERSON_WORD_ID, PERSON_ATTRIBUTE = __split_id_attribute(CoreDict().trie.get(TAG_PEOPLE))
+PLACE_WORD_ID, PLACE_ATTRIBUTE = __split_id_attribute(CoreDict().trie.get(TAG_PLACE))
+ORG_WORD_ID, ORG_ATTRIBUTE = __split_id_attribute(CoreDict().trie.get(TAG_GROUP))
+PROPER_WORD_ID, PROPER_ATTRIBUTE = __split_id_attribute(CoreDict().trie.get(TAG_PROPER))
+TIME_WORD_ID, TIME_ATTRIBUTE = __split_id_attribute(CoreDict().trie.get(TAG_TIME))
+NUMBER_WORD_ID, NUMBER_ATTRIBUTE = __split_id_attribute(CoreDict().trie.get(TAG_NUMBER))
+CLUSTER_WORD_ID, CLUSTER_ATTRIBUTE = __split_id_attribute(CoreDict().trie.get(TAG_CLUSTER))
 
 @singleton
 class CustomDict:

@@ -2,11 +2,11 @@
 from __future__ import absolute_import
 import math
 
-from ..collection.dict import CoreDict, Attribute, CustomDict
-from ..common.nature import NATURE
-from ..utility.chartype import *
+from yaya.collection.dict import *
+from yaya.common.nature import NATURE
+from yaya.utility.chartype import *
 from yaya.collection.bigram import CoreBiGramTable
-from yaya.const import TAG_BIGIN, TAG_END, SMOOTHING_PARAM, SMOOTHING_FACTOR, MAX_FREQUENCY, TAG_NUMBER, TAG_CLUSTER
+from yaya.const import *
 
 __author__ = 'tony'
 
@@ -22,15 +22,15 @@ class AtomNode:
 
 class Vertex:
     # def __init__(self, real_word, word=None, attribute=None, word_id=0):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, real_word, *args, **kwargs):
         if kwargs.has_key('attribute'):
             attribute = kwargs.get('attribute')
             self.attribute = attribute if isinstance(attribute, Attribute) else Attribute(attribute)
 
         self.word_id = kwargs.get('word_id', -1)
-        word = kwargs.get('word')
-        self.word = word if word is not None else self.real_word
-        self.word_id = kwargs.get('word_id')
+        self.real_word = real_word
+        word = kwargs.get('word', None)
+        self.word = word if word is not None else self.compile_real_word(self.real_word, self.attribute)
         self.vertex_from = None
         self.weight = 0
 
@@ -47,18 +47,11 @@ class Vertex:
 
     @property
     def nature(self):
-        if self.attribute._nature.__len__() != 0:
-            return self.attribute._nature.items()[0][0]
-        else:
-            return None
-
-    @property
-    def real_word(self):
-        return self.attribute.real_word
+        return self.attribute.nature
 
     @nature.setter
     def nature(self, value):
-        self.attribute._nature.items()[0][0] = value
+        self.attribute.nature = value
 
     def update_from(self, vertex_from):
         weight = vertex_from.weight + Vertex.calc_wight(vertex_from, self)
@@ -77,6 +70,45 @@ class Vertex:
         if value < 0:
             value = -value
         return value
+
+    def compile_real_word(self, real_word, attribute):
+        if (len(attribute.natures) >= 1):
+            if attribute.nature in [NATURE.nr,
+                                    NATURE.nr1,
+                                    NATURE.nr2,
+                                    NATURE.nrf,
+                                    NATURE.nrj]:
+                self.word_id = PERSON_WORD_ID
+                return TAG_PEOPLE
+            elif attribute.nature in [NATURE.ns, NATURE.nsf]:
+                self.word_id = PLACE_WORD_ID
+                return TAG_PLACE
+            elif attribute.nature in [NATURE.nz, NATURE.nx]:
+                self.word_id = PROPER_WORD_ID
+                return TAG_PROPER
+            elif attribute.nature in [
+                NATURE.nt,
+                NATURE.ntc,
+                NATURE.ntcf,
+                NATURE.ntcb,
+                NATURE.ntch,
+                NATURE.nto,
+                NATURE.ntu,
+                NATURE.nts,
+                NATURE.nth,
+                NATURE.nit]:
+                self.word_id = PLACE_WORD_ID
+                return TAG_GROUP
+            elif attribute.nature in [NATURE.m, NATURE.mq]:
+                self.word_id = NUMBER_WORD_ID
+                return TAG_NUMBER
+            elif attribute.nature == NATURE.x:
+                self.word_id = CLUSTER_WORD_ID
+                return TAG_CLUSTER
+            elif attribute.nature in [NATURE.t]:
+                self.word_id = TIME_WORD_ID
+                return TAG_TIME
+            return real_word
 
 
 def atom_seg(text, begin, end):
@@ -134,12 +166,18 @@ def combine_by_custom_dict(vertex_list):
                 for j in range(start, end):
                     word += word_net[j].real_word
                     word_net[j] = None
-                word_net[i] = Vertex(real_word=word, attribute=value)
+                word_net[i] = Vertex(real_word=word, attribute=value[1:])
 
     # todo 考虑加入动态用户词典
     if None in word_net:
         word_net.remove(None)
     return word_net
+
+
+def dump_vertexs(vertexs):
+    logger.info("=" * 30)
+    for i, v in enumerate(vertexs):
+        logger.info("[%d] %s %s %s" % (i, v.real_word, v.word, v.nature))
 
 class WordNet:
     def __init__(self, text=None, vertexs=None):
@@ -181,16 +219,19 @@ class WordNet:
                 word = TAG_CLUSTER
             self.add(line + offset, Vertex(word=word,
                                            real_word=atom_node.word,
-                                           attribute=Attribute([atom_node.word, str(nature), '1']),
+                                           attribute=Attribute([str(nature), '1']),
                                            word_id=-1
                                            ))
 
+    def __len__(self):
+        return len(self.vertexs)
 
-def gen_word_net(text, word_net):
-    searcher = CoreDict().trie.searcher(text)
+
+def gen_word_net(text, word_net, dat=CoreDict().trie):
+    searcher = dat.buildcoredictsearcher(text)
     while searcher.next():
         word_net.add(searcher.begin + 1, Vertex(real_word=searcher.value[0],
-                                            attribute=searcher.value,
+                                                attribute=searcher.value[1:],
                                             word_id=searcher.index))
     for i in range(word_net.vertexs.__len__()):
     # for i, v in enumerate(word_net.vertexs):
@@ -207,8 +248,7 @@ def gen_word_net(text, word_net):
 def new_tag_vertex(tag):
     word_id, attribute = CoreDict().trie.get(tag)
     if word_id > 0:
-        vertex = Vertex(attribute=attribute, word=tag, word_id=word_id)
-        vertex.attribute.real_word = chr(32)
+        vertex = Vertex(chr(32), attribute=attribute[1:], word=tag, word_id=word_id)
         return vertex
     else:
         logger.error(u"从核心字典加载%s信息时出错", tag)

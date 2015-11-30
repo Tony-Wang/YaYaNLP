@@ -1,14 +1,16 @@
 # -*- coding:utf-8 -*-
 import codecs
 import time
+
 from yaya.collection.dict import DoubleArrayTrie
+
 __author__ = 'tony'
 
 
 def main():
     f = codecs.open("./test/data/我的团长我的团.txt", 'r', "utf-8")
     text = f.read()
-    search = DoubleArrayTrie.searcher(text)
+    search = DoubleArrayTrie.buildcoredictsearcher(text)
     i = 0
     start = time.time()
     while search.next():

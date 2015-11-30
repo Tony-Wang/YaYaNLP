@@ -1,8 +1,7 @@
 from yaya import config
-from yaya.collection.dict import DoubleArrayTrie, CoreDict
+from yaya.collection.dict import DoubleArrayTrie
 from yaya.collection.hmm import HMMMatrix
 from yaya.common.nt import NTPattern, NT
-from yaya.const import TAG_GROUP
 from yaya.utility.singleton import singleton
 
 __author__ = 'tony'
@@ -15,7 +14,6 @@ class OrgDict:
         self.matrix = HMMMatrix.load(config.ORG_TR_PATH, NT)
 
 
-ORG_WORD_ID, ORG_ATTRIBUTE = CoreDict().trie.get(TAG_GROUP)
 
 
 @singleton

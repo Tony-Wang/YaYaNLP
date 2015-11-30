@@ -1,6 +1,5 @@
 # coding=utf-8
 import logging
-from collections import namedtuple
 
 __author__ = 'tony'
 

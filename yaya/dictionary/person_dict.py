@@ -1,8 +1,7 @@
 from yaya import config
-from yaya.collection.dict import DoubleArrayTrie, CoreDict
+from yaya.collection.dict import DoubleArrayTrie
 from yaya.collection.hmm import HMMMatrix
 from yaya.common.nr import NRPattern, NR
-from yaya.const import TAG_PEOPLE
 from yaya.utility.singleton import singleton
 
 __author__ = 'tony'
@@ -14,7 +13,6 @@ class PersonDict:
         self.trie = DoubleArrayTrie.load(config.PERSON_DICT_NAME)
         self.matrix = HMMMatrix.load(config.PERSON_TR_PATH, NR)
 
-PERSON_WORD_ID, PERSON_ATTRIBUTE = CoreDict().trie.get(TAG_PEOPLE)
 
 @singleton
 class NRPatternDict:

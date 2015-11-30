@@ -3,7 +3,7 @@ __author__ = 'tony'
 import os
 
 DICT_BIN_EXT = '.ya'
-
+DICT_BIN_REVERSE_EXT = '.reverse.ya'
 DATA_ROOT = "/home/tony/MyProject/YaYaNLP/data"
 
 CUSTOM_DICT_NAME = [os.path.join(DATA_ROOT + "/dictionary/custom/", f) for f in [
@@ -29,13 +29,21 @@ ORG_DICT_NAME = os.path.join(DATA_ROOT, "dictionary/organization/nt.txt")
 PLACE_TR_PATH = os.path.join(DATA_ROOT, "dictionary/place/ns.tr.txt")
 PLACE_DICT_NAME = os.path.join(DATA_ROOT, "dictionary/place/ns.txt")
 
+TRADITIONAL_CHINESE_DICT_NAME = os.path.join(DATA_ROOT, "dictionary/tc/TraditionalChinese.txt")
 
 # 全局配置
 class _Config:
+    # 是否使用用户字典
+    use_custom_dic = True
+
     # 中国人名识别
     name_recognize = True
+
     # 地名识别
     place_recognize = True
+
+    # 机构识别
+    org_recognize = True
 
     debug = False
 

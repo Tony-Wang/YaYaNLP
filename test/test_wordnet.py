@@ -37,9 +37,9 @@ class TestWordNet(TestCase):
         self.assertTrue([] not in word_net.vertexs, u"原始词网，不能可能有空节点")
 
     def test_vector(self):
-        v1 = Vertex(attribute="test nr 1")
-        v2 = Vertex(attribute="test nr 1")
-        v3 = Vertex(attribute="test nr1 1")
+        v1 = Vertex("test", attribute="nr 1")
+        v2 = Vertex("test", attribute="nr 1")
+        v3 = Vertex("test", attribute="nr1 1")
         self.assertEqual(v1, v2)
         self.assertNotEqual(v1, v3)
         self.assertIn(v1, [v2])

@@ -1,8 +1,9 @@
 # coding=utf-8
 from unittest import TestCase
 
+from collection.dict import DoubleArrayTrie
 from yaya.seg import segment
-from yaya.seg.wordnet import atom_seg
+from yaya.seg.wordnet import atom_seg, WordNet, gen_word_net
 from yaya.utility.chartype import *
 
 __author__ = 'tony'
@@ -37,3 +38,17 @@ class TestSegment(TestCase):
         self.assertIn((u"李纪恒", 'nr', 10), terms, u"测试是否找出人名")
         self.assertIn((u"仇和", 'nr', 14), terms, u"测试是否找出人名")
         self.assertIn((u"王春桂", 'nr', 17), terms, u"测试是否找出人名")
+
+    def test_combin_by_dict(self):
+        dat = DoubleArrayTrie()
+        dat.build([u"江", u"河", u"湖", "海"])
+        text = u"江河湖海"
+        word_net = WordNet(text)
+        gen_word_net(text, word_net, dat)
+        vertexs = [v[0] for v in word_net.vertexs]
+        self.assertEqual(len(word_net), 6, u"自定义字典分词")
+
+        combin_dat = DoubleArrayTrie()
+        combin_dat.build(key=[u"江河湖海"], v=[u"江河湖海 n 1"])
+        vertexs = segment.combin_by_dict(vertexs, combin_dat)
+        self.assertEqual(len(vertexs), 3, u"合并完成后应该只有前尾加中间词")
