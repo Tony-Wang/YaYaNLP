@@ -8,22 +8,27 @@ YaYaNLP提供以下功能：
  * 地名识别
  * 组织机构识别
 - 简繁转换
+
 ## 项目
+
 项目主页：[https://github.com/Tony-Wang/YaYaNLP](https://github.com/Tony-Wang/YaYaNLP)
 我的主页：[www.huangyong.me](http://wwww.huangyong.me)
 
 ## 安装
 
 ### 直接下载源码包，解压后运行
+
 ``` bash
 python setup.py install
 ```
 
 ### 下载字典与模型文件
+
 YaYaNLP使用了与HanLP兼容的字典数据，而编译后的字典数据保存的扩展名为.ya
 可以直接从hanLP项目下载，[data-for-1.2.4.zip](http://pan.baidu.com/s/1gd1vo8j)
 
 ### 配置数据文件路径
+
 在**yaya/const.py**修改自己的数据文件路径
 ``` python
 DATA_ROOT = "/your/data/path"
