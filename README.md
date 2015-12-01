@@ -11,7 +11,9 @@ YaYaNLP提供以下功能：
 ## 项目
 项目主页：[https://github.com/Tony-Wang/YaYaNLP](https://github.com/Tony-Wang/YaYaNLP)
 我的主页：[www.huangyong.me](http://wwww.huangyong.me)
+
 ## 安装
+
 ### 直接下载源码包，解压后运行
 ``` bash
 python setup.py install
