@@ -1,6 +1,6 @@
 # coding=utf-8
 from __future__ import unicode_literals
-from enum import Enum
+from yaya.common.enum import Enum
 
 __author__ = 'tony'
 

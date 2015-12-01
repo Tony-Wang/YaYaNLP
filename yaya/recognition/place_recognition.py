@@ -1,6 +1,6 @@
 # coding=utf-8
-from common.ns import NS
-from dictionary.place_dict import NSPatternDict, PlaceDict
+from yaya.common.ns import NS
+from yaya.dictionary.place_dict import NSPatternDict, PlaceDict
 
 __author__ = 'tony'
 # coding=utf-8
@@ -32,7 +32,6 @@ def recognition(vertexs, wordnet_optimum, wordnet_all):
         # 添加到词网内
         vertex = Vertex(name_str, attribute="ns 1")
         wordnet_optimum.add(vertexs_offset[search.begin + 1], vertex)
-
 
 
 def role_tag(word_seg_list):

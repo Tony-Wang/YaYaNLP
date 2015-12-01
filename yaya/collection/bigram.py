@@ -2,10 +2,11 @@
 from __future__ import absolute_import
 
 import time
-from .. import config
-from .dict import CoreDict
-from ..const import logger
-from ..utility.singleton import singleton
+
+from yaya import config
+from yaya.collection.dict import CoreDict
+from yaya.const import logger
+from yaya.utility.singleton import singleton
 
 __author__ = 'tony'
 

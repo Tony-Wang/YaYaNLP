@@ -17,7 +17,7 @@ setup(
     author_email=AUTHOR_EMAIL,
     license="BSD",
     url=URL,
-    packages=find_packages(include=["yaya*"], exclude=["test*", "data*"]),
+    packages=find_packages(include=["yaya*", "demo*"], exclude=["test*", "data*"]),
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',

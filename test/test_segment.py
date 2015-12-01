@@ -37,7 +37,6 @@ class TestSegment(TestCase):
         self.assertIn((u"秦光荣", 'nr', 6), terms, u"测试是否找出人名")
         self.assertIn((u"李纪恒", 'nr', 10), terms, u"测试是否找出人名")
         self.assertIn((u"仇和", 'nr', 14), terms, u"测试是否找出人名")
-        self.assertIn((u"王春桂", 'nr', 17), terms, u"测试是否找出人名")
 
     def test_combin_by_dict(self):
         dat = DoubleArrayTrie()

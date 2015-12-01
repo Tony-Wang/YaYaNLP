@@ -1,4 +1,4 @@
-from common.ns import NS, NSPattern
+from yaya.common.ns import NS, NSPattern
 from yaya import config
 from yaya.collection.dict import DoubleArrayTrie
 from yaya.collection.hmm import HMMMatrix

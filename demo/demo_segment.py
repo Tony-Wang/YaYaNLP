@@ -20,14 +20,11 @@ def main():
     terms = segment.seg(text)
     print_terms(terms)
 
-    # 繁简转换
+    # 简繁转换
     text = u"以后等你当上皇后，就能买草莓庆祝了"
     print segment.simplified_to_traditional(text)
 
     # 繁简转换
-    text = u"以后等你当上皇后，就能买草莓庆祝了"
-    print segment.simplified_to_traditional(text)
-
     text = u"用筆記簿型電腦寫程式HelloWorld"
     print segment.traditional_to_simplified(text)
 

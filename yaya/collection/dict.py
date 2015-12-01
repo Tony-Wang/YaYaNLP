@@ -1,7 +1,8 @@
 # -*- coding:utf-8 -*-
+import cPickle as Pickle
 from collections import OrderedDict
 
-from const import *
+from yaya.const import *
 from yaya import config
 from yaya.utility.singleton import singleton
 from yaya.common.nature import NATURE
@@ -21,9 +22,7 @@ class Attribute:
         self.attr = attr if isinstance(attr, list) else attr.split(' ')
         self._nature = {}
         self.total = 0
-        # self.real_word = self.attr[0]
         for i in range(0, self.attr.__len__(), 2):
-            # self.nature[self.attr[i]] = int(self.attr[i + 1])
             self._nature[cls[self.attr[i]]] = int(self.attr[i + 1])
             self.total += int(self.attr[i + 1])
 
@@ -34,8 +33,6 @@ class Attribute:
         return ' '.join(self.attr)
 
     def get_nature_frequency(self, nature):
-        # if isinstance(nature, str) or isinstance(nature, unicode):
-        #     nature = self.cls[nature].index
         if nature not in self._nature:
             return 0
         else:
@@ -52,9 +49,9 @@ class Attribute:
         else:
             return None
 
-    @nature.setter
-    def nature(self, value):
-        self._nature.items()[0][0] = value
+    # @nature.setter
+    # def nature(self, value):
+    #     self._nature.items()[0][0] = value
 
     @property
     def total_frequency(self):
@@ -63,8 +60,6 @@ class Attribute:
 
 class DoubleArrayTrie:
     def __init__(self):
-        # self.BUF_SIZE = 16384
-        # self.UNIT_SIZE = 8
         self.check = []
         self.base = []
         self.used = []
@@ -95,15 +90,11 @@ class DoubleArrayTrie:
     def fetch(self, parent, siblings):
         if self.error_ < 0:
             return 0
-
         prev = 0
-
         for i in xrange(parent.left, parent.right):
             if parent.depth > (self.length[i] if self.length is not None else self.key[i].__len__()):
                 continue
-
             tmp = self.key[i]
-
             cur = 0
             if (self.length[i] if self.length is not None else tmp.__len__()) != parent.depth:
                 cur = ord(tmp[parent.depth]) + 1
@@ -284,43 +275,36 @@ class DoubleArrayTrie:
     def save_bin(trie, filename):
         import cPickle as Pickle
         with open(filename, 'w') as f:
-            Pickle.dump(trie, f)
+            Pickle.dump(trie, f, protocol=2)
             f.close()
 
     @staticmethod
     def load_bin(filename):
-        import cPickle as Pickle
         with open(filename, 'r') as f:
             trie = Pickle.load(f)
-            # trie = DoubleArrayTrie()
-            # trie.base = data['base']
-            # trie.check = data['check']
-            # trie.v = data['v']
-            # trie.value = data['value']
-            # f.close()
             return trie
 
     @staticmethod
-    def load_dict(filenames, key=None, value=None):
+    def load_dict(filenames, key_func=None, value_func=None):
         import codecs
-        k, v, flist = [], [], []
+        k, v, dict_list = [], [], []
         if not isinstance(filenames, list):
             filenames = [filenames]
 
         for filename in filenames:
             with codecs.open(filename, 'r', 'utf-8') as f:
-                flist += f.read().splitlines()
-        key = key or (lambda i: i.split()[0])
-        value = value or (lambda i: i)
+                dict_list += f.read().splitlines()
+        key_func = key_func or (lambda i: i.split()[0])
+        value_func = value_func or (lambda i: i)
 
         # sort
         dict_map = {}
-        for i in flist:
-            dict_map[key(i)] = value(i).split()  # 此处需要解开成列表，viterbi会直接用到
-        # for i in flist:
-        #     k.append(key(i))
-        #     v.append(value(i))
-        # k
+        for i in dict_list:
+            value = value_func(i)
+            if isinstance(value, str):
+                value = value.split()[1:]
+            dict_map[key_func(i)] = value_func(i)  # 此处需要解开成列表，viterbi会直接用到
+
         dict_map = OrderedDict(sorted(dict_map.items()))
         trie = DoubleArrayTrie()
         trie.build(key=dict_map.keys(), v=dict_map.values())
@@ -330,13 +314,13 @@ class DoubleArrayTrie:
         return Searcher(self, key, offset)
 
     @staticmethod
-    def load(filenames, keyfunc=None, valuefunc=None, dict_bin_ext=config.DICT_BIN_EXT):
+    def load(filenames, key_func=None, value_func=None, dict_bin_ext=config.DICT_BIN_EXT):
         import os
         # 考虑用户自定义宝典输入为列表的情况
         filename = filenames[0] if type(filenames) is list else filenames
         if not config.Config.debug and os.path.exists(filename + dict_bin_ext):
             return DoubleArrayTrie.load_bin(filename + dict_bin_ext)
-        trie = DoubleArrayTrie.load_dict(filenames, keyfunc, valuefunc)
+        trie = DoubleArrayTrie.load_dict(filenames, key_func, value_func)
         DoubleArrayTrie.save_bin(trie, filename + dict_bin_ext)
         return trie
 

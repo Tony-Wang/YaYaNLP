@@ -1,42 +1,4 @@
 # coding=utf-8
-
-# def name2desc(cls, name):
-#     """
-#     根据枚举量得到枚举量的描述
-#     :param cls: 类变量
-#     :param name: 枚举变量的字符名
-#     :return: 该变量的描述
-#     """
-#     return cls.name_describe_map[name]
-#
-#
-# def name2value(cls, name):
-#     """
-#     根据枚举量得到该枚举量的数值
-#     :param cls:
-#     :param name:
-#     :return:
-#     """
-#     return cls.__dict__[name]
-#
-#
-# def build_enum(class_):
-#     index = 0
-#     class_.__dict__["name_describe_map"] = {}
-#     class_.__dict__["name2desc"] = classmethod(name2desc)
-#     class_.__dict__["name2value"] = classmethod(name2value)
-#
-#     if type(class_.enum) is dict:
-#         for i in class_.enum.items():
-#             class_.name_describe_map[i[0]] = (index, i[1])
-#             setattr(class_, i[0], index)
-#             index += 1
-#     elif type(class_.enum) is list:
-#         for i in class_.enum:
-#             setattr(class_, i[0], index)
-#             index += 1
-
-
 class EnumException(Exception):
     """ Base class for all exceptions in this module. """
 

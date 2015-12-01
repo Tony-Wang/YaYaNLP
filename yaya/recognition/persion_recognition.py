@@ -43,6 +43,8 @@ def role_tag(word_seg_list):
         if value is None:
             value = Attribute([str(NR.A), PersonDict().matrix.get_total_freq(NR.A)], cls=NR)
         else:
-            value = Attribute(value.split()[1:], cls=NR)
+            if not isinstance(value, list):
+                value = value.split()
+            value = Attribute(value[1:], cls=NR)
         tag_index_list.append(value)
     return tag_index_list

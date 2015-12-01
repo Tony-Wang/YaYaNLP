@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 import math
 
-from common.ns import NS
+from yaya.common.ns import NS
 from yaya import config
 from yaya.common.nr import NR
 from yaya.common.nt import NT

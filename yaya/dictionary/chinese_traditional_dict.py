@@ -1,6 +1,6 @@
-from collection.dict import DoubleArrayTrie
+from yaya.collection.dict import DoubleArrayTrie
 from yaya import config
-from utility.singleton import singleton
+from yaya.utility.singleton import singleton
 
 __author__ = 'tony'
 

@@ -1,7 +1,7 @@
 # coding=utf-8
-from collection.dict import CustomDict
-from dictionary.chinese_traditional_dict import SimplifiedChineseDict, TraditionalChineseDict
-from recognition import place_recognition
+from yaya.collection.dict import CustomDict
+from yaya.dictionary.chinese_traditional_dict import SimplifiedChineseDict, TraditionalChineseDict
+from yaya.recognition import place_recognition
 from yaya.config import Config
 from yaya.recognition import persion_recognition
 from yaya.recognition import organization_recognition
