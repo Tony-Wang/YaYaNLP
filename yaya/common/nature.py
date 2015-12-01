@@ -152,6 +152,7 @@ NATURE = Enum(
     "wb",  # u"百分号千分号",
     "wh",  # u"单位符号",
     "end",  # u"仅用于始",
-    "begin"  # u"仅用于终"
+    "begin",  # u"仅用于终"
+    enum_name="NATURE"  # 如果不指定，enum持久化时按id来判断类型的相等
 )
 

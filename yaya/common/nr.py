@@ -68,7 +68,9 @@ NR = Enum(
 
     # 句子的开头
 
-    'S'
+    'S',
+    enum_name="NR"
+
 )
 
 NRPattern = [

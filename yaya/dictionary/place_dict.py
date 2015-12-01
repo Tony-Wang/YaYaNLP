@@ -10,7 +10,7 @@ __author__ = 'tony'
 @singleton
 class PlaceDict:
     def __init__(self):
-        self.trie = DoubleArrayTrie.load(config.PLACE_DICT_NAME)
+        self.trie = DoubleArrayTrie.load(config.PLACE_DICT_NAME, enum_cls=NS)
         self.matrix = HMMMatrix.load(config.PLACE_TR_PATH, NS)
 
 

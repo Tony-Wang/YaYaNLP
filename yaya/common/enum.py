@@ -58,7 +58,7 @@ class EnumValue(object):
 
     def __init__(self, enumtype, index, key):
         """ Set up a new instance. """
-        self._enumtype = enumtype
+        self._enumtype = enumtype.enum_name
         self._index = index
         self._key = key
 
@@ -115,7 +115,9 @@ class Enum(object):
         """ Create an enumeration instance. """
 
         value_type = kwargs.get('value_type', EnumValue)
-
+        enum_name = kwargs.get('enum_name', None)
+        assert enum_name is not None
+        self.__dict__['enum_name'] = enum_name
         if not keys:
             raise EnumEmptyError()
 

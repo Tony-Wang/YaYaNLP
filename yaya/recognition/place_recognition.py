@@ -44,9 +44,9 @@ def role_tag(word_seg_list):
         index, value = PlaceDict().trie.get(vertex.real_word)
         if value is None:
             value = Attribute([str(NS.Z), PlaceDict().matrix.get_total_freq(NS.Z)], cls=NS)
-        else:
-            if not isinstance(value, list):
-                value = value.split()
-            value = Attribute(value[1:], cls=NS)
+        # else:
+        #     if not isinstance(value, list):
+        #         value = value.split()
+        #     value = Attribute(value[1:], cls=NS)
         tag_index_list.append(value)
     return tag_index_list

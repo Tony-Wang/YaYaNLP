@@ -33,7 +33,7 @@ def recognition(vertexs, wordnet_optimum, wordnet_all):
             name_str += vertexs[i].real_word
 
         # 添加到词网内
-        vertex = Vertex(name_str, attribute=Attribute(ORG_ATTRIBUTE))
+        vertex = Vertex(name_str, attribute=ORG_ATTRIBUTE)
         wordnet_optimum.add(vertexs_offset[search.begin], vertex)
     vertexs = viterbi(wordnet_optimum.vertexs)
     return vertexs
@@ -62,10 +62,10 @@ def role_tag(word_seg_list):
         index, value = OrgDict().trie.get(vertex.word)
         if value is None:
             value = Attribute([str(NT.Z), OrgDict().matrix.get_total_freq(NT.Z)], cls=NT)
-        else:
-            if not isinstance(value, list):
-                value = value.split()
-            value = Attribute(value[1:], cls=NT)
+        # else:
+        #     # if not isinstance(value, list):
+        #     #     value = value.split()
+        #     # value = Attribute(value[1:], cls=NT)
 
         tag_index_list.append(value)
 

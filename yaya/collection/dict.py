@@ -7,8 +7,10 @@ from yaya import config
 from yaya.utility.singleton import singleton
 from yaya.common.nature import NATURE
 
+ATTRIBUTE_MAIN_NATURE_INDEX = 0
 
-class Node:
+
+class Node(object):
     def __init__(self, code=0, depth=0, left=0, right=0):
         self.code = code
         self.depth = depth
@@ -16,42 +18,49 @@ class Node:
         self.right = right
 
 
-class Attribute:
+class Attribute(object):
     def __init__(self, attr, cls=NATURE):
         self.cls = cls
-        self.attr = attr if isinstance(attr, list) else attr.split(' ')
-        self._nature = {}
         self.total = 0
-        for i in range(0, self.attr.__len__(), 2):
-            self._nature[cls[self.attr[i]]] = int(self.attr[i + 1])
-            self.total += int(self.attr[i + 1])
-
+        self.data = ()
+        if attr is not None:
+            attr = attr if isinstance(attr, list) else attr.split(' ')
+            nature = []
+            for i in range(0, attr.__len__(), 2):
+                nature.append(cls[attr[i]])
+                nature.append(int(attr[i + 1]))
+                self.total += int(attr[i + 1])
+            self.data = tuple(nature)
     def to_tuple(self):
-        return tuple(self.attr)
+        return self.data
 
     def __str__(self):
-        return ' '.join(self.attr)
+        return ' '.join([str(x) for x in self.data])
+
+    def __repr__(self):
+        return u"Attribute(%s)" % self.__str__()
+
+    def __len__(self):
+        return len(self.data) / 2
 
     def get_nature_frequency(self, nature):
-        if nature not in self._nature:
+        try:
+            return self.data[self.data.index(nature) + 1]
+        except:
             return 0
-        else:
-            return self._nature[nature]
 
     @property
     def natures(self):
-        return self._nature.items()
+        for i in range(0, len(self.data), 2):
+            yield self.data[i], self.data[i + 1]
+            # return self.data
 
     @property
     def nature(self):
-        if self._nature.__len__() != 0:
-            return self._nature.items()[0][0]
+        if self.data.__len__() != 0:
+            return self.data[ATTRIBUTE_MAIN_NATURE_INDEX]
         else:
             return None
-
-    # @nature.setter
-    # def nature(self, value):
-    #     self._nature.items()[0][0] = value
 
     @property
     def total_frequency(self):
@@ -86,6 +95,7 @@ class DoubleArrayTrie:
         self.check.extend([0] * offsize)
         self.used.extend([0] * offsize)
         self.alloc_size = newsize
+
 
     def fetch(self, parent, siblings):
         if self.error_ < 0:
@@ -153,7 +163,7 @@ class DoubleArrayTrie:
                 continue
 
             find = True
-            for i in range(siblings.__len__()):
+            for i in xrange(siblings.__len__()):
                 if self.check[begin + siblings[i].code] != 0:
                     find = False
                     break
@@ -211,7 +221,6 @@ class DoubleArrayTrie:
         self.fetch(root_node, siblings)
         self.insert(siblings)
 
-        self.used = None
         self.key = None
 
         return self.error_
@@ -227,7 +236,7 @@ class DoubleArrayTrie:
         result = -1
         b = self.base[nodepos]
 
-        for i in range(pos, keylen):
+        for i in xrange(pos, keylen):
             p = b + ord(key[i]) + 1
             if b == self.check[p]:
                 b = self.base[p]
@@ -247,6 +256,12 @@ class DoubleArrayTrie:
             return index, self.v[index]
         else:
             return index, None
+
+    # def get_attribute(self, key):
+    #     index, value = self.get(key)
+    #     if value is not None:
+    #         value = Attribute(value[1:])
+    #     return value
 
     def transition(self, path, state_from):
         b = state_from
@@ -271,11 +286,20 @@ class DoubleArrayTrie:
         for i in range(self.size):
             print("i: %s [%s,%s]" % (i, self.base[i], self.check[i]))
 
+    def compress(self):
+        last = self.alloc_size - 1
+        while self.used[last] == 0:
+            last -= 1
+        self.base = self.base[:last + 1]
+        self.check = self.check[:last + 1]
+        self.alloc_size = len(self.base)
+
     @staticmethod
-    def save_bin(trie, filename):
+    def save_to_ya(trie, filename):
+        # trie.compress()
         import cPickle as Pickle
         with open(filename, 'w') as f:
-            Pickle.dump(trie, f, protocol=2)
+            Pickle.dump(trie, f)
             f.close()
 
     @staticmethod
@@ -285,7 +309,7 @@ class DoubleArrayTrie:
             return trie
 
     @staticmethod
-    def load_dict(filenames, key_func=None, value_func=None):
+    def load_dict_file(filenames, key_func=None, value_func=None, enum_cls=NATURE):
         import codecs
         k, v, dict_list = [], [], []
         if not isinstance(filenames, list):
@@ -294,17 +318,21 @@ class DoubleArrayTrie:
         for filename in filenames:
             with codecs.open(filename, 'r', 'utf-8') as f:
                 dict_list += f.read().splitlines()
-        key_func = key_func or (lambda i: i.split()[0])
-        value_func = value_func or (lambda i: i)
 
+        return DoubleArrayTrie.load_from_list(dict_list, key_func, value_func, enum_cls)
+
+    @staticmethod
+    def load_from_list(dict_list, key_func=None, value_func=None, enum_cls=NATURE):
+        key_func = key_func or (lambda i: i.split()[0])
+        value_func = value_func or (lambda i: Attribute(i.split(chr(32))[1:], cls=enum_cls))
         # sort
         dict_map = {}
         for i in dict_list:
-            value = value_func(i)
-            if isinstance(value, str):
-                value = value.split()[1:]
+            # value = value_func(i)
+            # if isinstance(value, str):
+            #     value = value.split(chr(32))[1:]
+            i = i.replace('\t', chr(32))
             dict_map[key_func(i)] = value_func(i)  # 此处需要解开成列表，viterbi会直接用到
-
         dict_map = OrderedDict(sorted(dict_map.items()))
         trie = DoubleArrayTrie()
         trie.build(key=dict_map.keys(), v=dict_map.values())
@@ -314,14 +342,15 @@ class DoubleArrayTrie:
         return Searcher(self, key, offset)
 
     @staticmethod
-    def load(filenames, key_func=None, value_func=None, dict_bin_ext=config.DICT_BIN_EXT):
+    def load(filenames, key_func=None, value_func=None,
+             dict_bin_ext=config.DICT_BIN_EXT, enum_cls=NATURE):
         import os
         # 考虑用户自定义宝典输入为列表的情况
         filename = filenames[0] if type(filenames) is list else filenames
-        if not config.Config.debug and os.path.exists(filename + dict_bin_ext):
+        if config.Config.use_dict_cache and os.path.exists(filename + dict_bin_ext):
             return DoubleArrayTrie.load_bin(filename + dict_bin_ext)
-        trie = DoubleArrayTrie.load_dict(filenames, key_func, value_func)
-        DoubleArrayTrie.save_bin(trie, filename + dict_bin_ext)
+        trie = DoubleArrayTrie.load_dict_file(filenames, key_func, value_func, enum_cls)
+        DoubleArrayTrie.save_to_ya(trie, filename + dict_bin_ext)
         return trie
 
     @staticmethod
@@ -343,40 +372,41 @@ class Searcher:
         self.value = None
 
         # 传入的字符数组
-        self.codearray = [ord(c) for c in chararray]
-        self.chararray = chararray
+        self.code_array = [ord(c) for c in chararray]
+
+        self.char_array = chararray
 
         # 上一个node位置
         self.trie = trie
         self.last = trie.base[0]
 
         # charArray的长度，效率起见，开个变量
-        self.arraylength = chararray.__len__()
+        self.array_length = chararray.__len__()
 
         # 上一个字符的下标
         self.i = offset - 1
         # // A trick，如果文本长度为0的话，调用next()时，会带来越界的问题。
-        self.begin = -1 if (self.arraylength is 0) else offset
+        self.begin = -1 if (self.array_length is 0) else offset
 
     # 是否命中，当返回false表示搜索结束，否则使用公开的成员读取命中的详细信息
     def next(self):
         b = self.last
         while 1:
             self.i += 1
-            if self.i == self.arraylength:  # 指针到头了，将起点往前挪一个，重新开始，状态归零
+            if self.i == self.array_length:  # 指针到头了，将起点往前挪一个，重新开始，状态归零
                 self.begin += 1
-                if self.begin == self.arraylength:
+                if self.begin == self.array_length:
                     break
                 self.i = self.begin
                 b = self.trie.base[0]
 
-            p = b + self.codearray[self.i] + 1  # 状态转移 p = base[char[i-1]] + char[i] + 1
+            p = b + self.code_array[self.i] + 1  # 状态转移 p = base[char[i-1]] + char[i] + 1
             if b == self.trie.check[p]:  # base[char[i-1]] == check[base[char[i-1]] + char[i] + 1]
                 b = self.trie.base[p]  # 转移成功
             else:
                 self.i = self.begin  # 转移失败，也将起点往前挪一个，重新开始，状态归零
                 self.begin += 1
-                if self.begin is self.arraylength:
+                if self.begin is self.array_length:
                     break
                 b = self.trie.base[0]
                 continue
@@ -385,7 +415,7 @@ class Searcher:
             if b == self.trie.check[p] and n < 0:  # base[p] == check[p] && base[p] < 0 查到一个词
                 self.length = self.i - self.begin + 1
                 self.index = -n - 1
-                self.key = self.chararray[self.begin:self.begin + self.length]
+                self.key = self.char_array[self.begin:self.begin + self.length]
                 self.value = self.trie.v[self.index]
                 self.last = b
                 return True
@@ -395,20 +425,20 @@ class Searcher:
         b = self.last
         while 1:
             self.i += 1
-            if self.i == self.arraylength:  # 指针到头了，将起点往前挪一个，重新开始，状态归零
+            if self.i == self.array_length:  # 指针到头了，将起点往前挪一个，重新开始，状态归零
                 self.begin += 1
-                if self.begin == self.arraylength:
+                if self.begin == self.array_length:
                     break
                 self.i = self.begin
                 b = self.trie.base[0]
 
-            p = b + self.codearray[self.i] + 1  # 状态转移 p = base[char[i-1]] + char[i] + 1
+            p = b + self.code_array[self.i] + 1  # 状态转移 p = base[char[i-1]] + char[i] + 1
             if b == self.trie.check[p]:  # base[char[i-1]] == check[base[char[i-1]] + char[i] + 1]
                 b = self.trie.base[p]  # 转移成功
             else:
                 self.i = self.begin  # 转移失败，也将起点往前挪一个，重新开始，状态归零
                 self.begin += 1
-                if self.begin is self.arraylength:
+                if self.begin is self.array_length:
                     break
                 b = self.trie.base[0]
                 continue
@@ -417,7 +447,7 @@ class Searcher:
             if b == self.trie.check[p] and n < 0:  # base[p] == check[p] && base[p] < 0 查到一个词
                 self.length = self.i - self.begin + 1
                 self.index = -n - 1
-                self.key = self.chararray[self.begin:self.begin + self.length]
+                self.key = self.char_array[self.begin:self.begin + self.length]
                 self.value = self.trie.v[self.index]
                 self.last = b
                 yield self.begin, self.key, self.value

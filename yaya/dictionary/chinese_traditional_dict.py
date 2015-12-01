@@ -8,17 +8,17 @@ __author__ = 'tony'
 class ChinseTraditionalBaseDict:
     def convert_key_to_value(self, text):
         search = self.trie.search(text)
-        wordnet = [None] * search.arraylength
-        lennet = [0] * search.arraylength
+        wordnet = [None] * search.array_length
+        lennet = [0] * search.array_length
         for i, k, v in search.search_all_words():
             if len(v[1]) > lennet[i]:
                 wordnet[i] = v[1]
                 lennet[i] = len(k)
         offset = 0
         valuetext = []
-        while offset < search.arraylength:
+        while offset < search.array_length:
             if wordnet[offset] is None:
-                valuetext.append(search.chararray[offset])
+                valuetext.append(search.char_array[offset])
                 offset += 1
             else:
                 valuetext.append(wordnet[offset])
