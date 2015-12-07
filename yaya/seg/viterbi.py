@@ -68,7 +68,7 @@ def viterbi_roletag(roletaglist, hmm):
     _length = len(roletaglist)
     taglist = []
     # 得到第一个元素的第一个标签的词性
-    _pre_nature = roletaglist[0].natures[0][0]
+    _pre_nature = roletaglist[0].nature
     _perfect_nature = _pre_nature
     taglist.append(_pre_nature)
     for i in xrange(1, _length):
@@ -87,17 +87,18 @@ def viterbi_template(node_list, hmm, init_cost=DOUBLE_MAX):
     node_count = len(node_list)
     taglist = []
     # 得到第一个元素的第一个标签的词性
-    _pre_vertex = node_list[0].natures[0][0]
-    _perfect_vertex = _pre_vertex
-    taglist.append(_pre_vertex)
+    _pre_nature = node_list[0].nature
+    _perfect_nature = _pre_nature
+    taglist.append(_pre_nature)
     for i,cur_node in enumerate(node_list[1:]):
         perfect_cost = init_cost
         for vertex, freq in cur_node.natures:
-            _now = hmm.trans_prob[_pre_vertex.index][vertex.index] - math.log((cur_node.get_nature_frequency(vertex)+1e-8) / hmm.get_total_freq(vertex))
+            _now = hmm.trans_prob[_pre_nature.index][vertex.index] - math.log(
+                (cur_node.get_nature_frequency(vertex) + 1e-8) / hmm.get_total_freq(vertex))
             if perfect_cost > _now:
                 perfect_cost = _now
-                _perfect_vertex = vertex
-        _pre_vertex = _perfect_vertex
-        taglist.append(_pre_vertex)
+                _perfect_nature = vertex
+        _pre_nature = _perfect_nature
+        taglist.append(_pre_nature)
     return taglist
 

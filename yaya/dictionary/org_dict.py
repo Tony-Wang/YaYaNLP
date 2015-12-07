@@ -10,7 +10,7 @@ __author__ = 'tony'
 @singleton
 class OrgDict:
     def __init__(self):
-        self.trie = DoubleArrayTrie.load(config.ORG_DICT_NAME)
+        self.trie = DoubleArrayTrie.load(config.ORG_DICT_NAME, enum_cls=NT)
         self.matrix = HMMMatrix.load(config.ORG_TR_PATH, NT)
 
 

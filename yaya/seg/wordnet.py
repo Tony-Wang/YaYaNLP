@@ -21,11 +21,12 @@ class AtomNode:
 
 
 class Vertex:
-    # def __init__(self, real_word, word=None, attribute=None, word_id=0):
     def __init__(self, real_word, *args, **kwargs):
         if kwargs.has_key('attribute'):
             attribute = kwargs.get('attribute')
-            self.attribute = attribute if isinstance(attribute, Attribute) else Attribute(attribute)
+        else:
+            index, attribute = CoreDict().trie.get(real_word)
+        self.attribute = attribute if isinstance(attribute, Attribute) else Attribute(attribute)
 
         self.word_id = kwargs.get('word_id', -1)
         self.real_word = real_word
@@ -35,10 +36,10 @@ class Vertex:
         self.weight = 0
 
     def __unicode__(self):
-        return self.real_word
+        return u"%s/%s" % (self.real_word, self.word)
 
-    def __str__(self):
-        return "%s/%s"%(self.real_word,self.word)
+    def __repr__(self):
+        return u"Vertex(%(real_word)r, %(attribute)r )" % vars(self)
 
     def __eq__(self, other):
         if type(self) != type(other):
@@ -48,6 +49,7 @@ class Vertex:
     @property
     def nature(self):
         return self.attribute.nature
+
 
     @nature.setter
     def nature(self, value):
@@ -72,7 +74,7 @@ class Vertex:
         return value
 
     def compile_real_word(self, real_word, attribute):
-        if (len(attribute.natures) >= 1):
+        if (len(attribute) >= 1):
             if attribute.nature in [NATURE.nr,
                                     NATURE.nr1,
                                     NATURE.nr2,
@@ -139,24 +141,23 @@ def atom_seg(text, begin, end):
     return node_list
 
 
-def combine_by_custom_dict(vertex_list):
-    word_net = vertex_list
-    trie = CustomDict().trie
-    for i in range(len(word_net)):
+def combine_by_custom_dict(vertexs, dat=CustomDict().trie):
+    dat = CustomDict().trie
+    for i in range(len(vertexs)):
         state = 1
-        if word_net[i] is None:
+        if vertexs[i] is None:
             continue
-        state = trie.transition(word_net[i].real_word, state)
+        state = dat.transition(vertexs[i].real_word, state)
         value = None
         if state > 0:
             start = i
             to = i + 1
             end = - 1
-            for to in range(to, len(word_net)):
-                state = trie.transition(word_net[to].real_word, state)
+            for to in range(to, len(vertexs)):
+                state = dat.transition(vertexs[to].real_word, state)
                 if state < 0:
                     break
-                output = trie.output(state)
+                output = dat.output(state)
                 if output is not None:
                     value = output
                     end = to + 1
@@ -164,14 +165,13 @@ def combine_by_custom_dict(vertex_list):
             if value is not None:
                 word = ""
                 for j in range(start, end):
-                    word += word_net[j].real_word
-                    word_net[j] = None
-                word_net[i] = Vertex(real_word=word, attribute=value[1:])
+                    word += vertexs[j].real_word
+                    vertexs[j] = None
+                vertexs[i] = Vertex(real_word=word, attribute=value)
 
     # todo 考虑加入动态用户词典
-    if None in word_net:
-        word_net.remove(None)
-    return word_net
+    return [v for v in vertexs if v is not None]
+
 
 
 def dump_vertexs(vertexs):
@@ -226,12 +226,19 @@ class WordNet:
     def __len__(self):
         return len(self.vertexs)
 
+    def __unicode__(self):
+        sb = []
+        sb.append("=" * 30)
+        for i, vl in enumerate(self.vertexs):
+            sb.append(u"[%d]:%s" % (i, u",".join([unicode(v) for v in vl])))
+        sb.append("=" * 30)
+        return u"\n".join(sb)
 
 def gen_word_net(text, word_net, dat=CoreDict().trie):
     searcher = dat.buildcoredictsearcher(text)
     while searcher.next():
-        word_net.add(searcher.begin + 1, Vertex(real_word=searcher.value[0],
-                                                attribute=searcher.value[1:],
+        word_net.add(searcher.begin + 1, Vertex(real_word=searcher.key,
+                                                attribute=searcher.value,
                                             word_id=searcher.index))
     for i in range(word_net.vertexs.__len__()):
     # for i, v in enumerate(word_net.vertexs):
@@ -244,11 +251,10 @@ def gen_word_net(text, word_net, dat=CoreDict().trie):
         else:
             i += word_net.vertexs[i][-1].real_word.__len__()
 
-
 def new_tag_vertex(tag):
     word_id, attribute = CoreDict().trie.get(tag)
     if word_id > 0:
-        vertex = Vertex(chr(32), attribute=attribute[1:], word=tag, word_id=word_id)
+        vertex = Vertex(chr(32), attribute=attribute, word=tag, word_id=word_id)
         return vertex
     else:
         logger.error(u"从核心字典加载%s信息时出错", tag)

@@ -34,41 +34,38 @@ YaYaNLP使用了与HanLP兼容的字典数据，而编译后的字典数据保�
 DATA_ROOT = "/your/data/path"
 ```
 
-## 使用
+## 特性
+###
 
-``` python
-# -*- coding=utf-8 -*-
-from yaya.seg import segment
-
-
-def print_terms(terms):
-    for i, v in enumerate(terms):
-        print v[0], v[1], v[2]
-
-
-def main():
+### 人名识别
+```
     # 识别人名
     text = u"签约仪式前，秦光荣、李纪恒、仇和等一同会见了参加签约的企业家。"
     terms = segment.seg(text)
     print_terms(terms)
+```
 
+```
     # 识别地名
     text = u"蓝翔给宁夏固原市彭阳县红河镇黑牛沟村捐赠了挖掘机"
     terms = segment.seg(text)
     print_terms(terms)
-
+```
+```
     # 简繁转换
     text = u"以后等你当上皇后，就能买草莓庆祝了"
     print segment.simplified_to_traditional(text)
 
+```
     # 繁简转换
     text = u"用筆記簿型電腦寫程式HelloWorld"
     print segment.traditional_to_simplified(text)
 
-
-if __name__ == '__main__':
-    main()
 ```
 
 ## 感谢
 本项目参考了[hanck/HanLP](https://github.com/hankcs/HanLP/)项目实现原理并使用了该项目的字典和模型文件。
+
+## 版权
+* Apache License Version 2.0
+* 任何使用了YaYaNLP的全部或部分功能、词典、模型的项目、产品或文章等形式的成果必须显式注明YaYaNLP及此项目主页。

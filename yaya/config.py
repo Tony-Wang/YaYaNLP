@@ -33,8 +33,11 @@ TRADITIONAL_CHINESE_DICT_NAME = os.path.join(DATA_ROOT, "dictionary/tc/Tradition
 
 # 全局配置
 class _Config:
+    # 是否优先使用缓存字典
+    use_dict_cache = True
+
     # 是否使用用户字典
-    use_custom_dic = True
+    use_custom_dict = True
 
     # 中国人名识别
     name_recognize = True
@@ -45,7 +48,7 @@ class _Config:
     # 机构识别
     org_recognize = True
 
-    debug = False
+    debug = True
 
 
 Config = _Config()

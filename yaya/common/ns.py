@@ -15,6 +15,7 @@ NS = Enum(
     'X',  # 连接词刘家村/和/下岸村/相邻
     'Z',  # 其它非地名成分
     'S',  # 句子的开头
+    enum_name="NS"
 )
 
 NSPattern = [
