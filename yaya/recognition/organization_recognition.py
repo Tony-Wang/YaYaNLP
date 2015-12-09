@@ -45,7 +45,7 @@ def role_tag(word_seg_list):
         nature = vertex.nature
         if nature == NATURE.nz:
             if vertex.attribute.total_frequency <= 1000:
-                tag_index_list.append(Attribute([str(NT.F), 1000]), NT)  # ((NT.F, 1000))
+                tag_index_list.append(Attribute([str(NT.F), 1000], cls=NT))  # ((NT.F, 1000))
             else:
                 break
             continue
@@ -53,10 +53,10 @@ def role_tag(word_seg_list):
                         NATURE.nic,
                         NATURE.nis,
                         NATURE.nit]:
-            tag_index_list.append(Attribute([str(NT.K), 1000, str(NT.D), 1000], NT))
+            tag_index_list.append(Attribute([str(NT.K), 1000, str(NT.D), 1000], cls=NT))
             continue
         elif nature == NATURE.m:
-            tag_index_list.append((NT.M, 1000))
+            tag_index_list.append(Attribute([str(NT.M), 1000], cls=NT))
             continue
 
         index, value = OrgDict().trie.get(vertex.word)

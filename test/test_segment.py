@@ -3,6 +3,7 @@ from unittest import TestCase
 
 from yaya.collection.dict import DoubleArrayTrie
 from yaya.seg import segment
+from yaya.seg.segment import traditional_seg
 from yaya.seg.wordnet import atom_seg, WordNet, gen_word_net, combine_by_custom_dict
 from yaya.utility.chartype import *
 
@@ -51,3 +52,7 @@ class TestSegment(TestCase):
         combin_dat.build(key=[u"江河湖海"], v=[u"江河湖海 n 1"])
         vertexs = combine_by_custom_dict(vertexs, combin_dat)
         self.assertEqual(len(vertexs), 3, u"合并完成后应该只有前尾加中间词")
+
+    def test_traditional_seg(self):
+        text = u"記者羅吉訓／新竹報導 雙方合作的主要內容包括，希望能夠促成太陽能設備安裝維修人才培養；結合推廣教育由綠野集團引薦國外學生來臺就讀；與觀光及餐飲系合作觀光休閒產業，提供來臺遊客入住大華科大樂群會館，並導覽參訪張學良故居等臺灣各知名景點。 訂閱聯絡電話：02-23222722-814 瀏覽器建議使用IE 9.0以上版本 最佳觀看解析度1024x768 網站更新日期：2015/12/13 "
+        print traditional_seg(text)

@@ -49,3 +49,9 @@ class TestWordNet(TestCase):
         # 标识词的real_word不能为空，否则在字典里无法表示
         self.assertEqual(new_tag_vertex(TAG_BIGIN).real_word, chr(32))
         self.assertEqual(new_tag_vertex(TAG_END).real_word, chr(32))
+
+    def test_word_net_insert(self):
+        text = u"1234567890"
+        word_net_all = WordNet(text)
+        for i, c in enumerate(text):
+            word_net_all.add(i + 1, Vertex(c))

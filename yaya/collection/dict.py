@@ -22,15 +22,22 @@ class Attribute(object):
     def __init__(self, attr, cls=NATURE):
         self.cls = cls
         self.total = 0
-        self.data = ()
-        if attr is not None:
-            attr = attr if isinstance(attr, list) else attr.split(' ')
-            nature = []
-            for i in range(0, attr.__len__(), 2):
-                nature.append(cls[attr[i]])
-                nature.append(int(attr[i + 1]))
-                self.total += int(attr[i + 1])
-            self.data = tuple(nature)
+        if not isinstance(attr, tuple):
+            self.data = ()
+            if attr is not None:
+                attr = attr if isinstance(attr, list) else attr.split(' ')
+                nature = []
+                for i in range(0, attr.__len__(), 2):
+                    nature.append(cls[attr[i]])
+                    nature.append(int(attr[i + 1]))
+                    self.total += int(attr[i + 1])
+                self.data = tuple(nature)
+        else:
+            self.data = attr
+            for i in range(len(self.data)):
+                if i % 2 == 1:
+                    self.total += self.data[i]
+
     def to_tuple(self):
         return self.data
 
@@ -69,13 +76,14 @@ class Attribute(object):
 
 class DoubleArrayTrie:
     def __init__(self):
+        self.alloc_size = 0
         self.check = []
         self.base = []
+
         self.used = []
         self.size = 0
-        self.alloc_size = 0
         self.key = []
-        self.keySize = 0
+        self.key_size = 0
         self.length = None
         self.value = []
         self.v = None
@@ -153,10 +161,10 @@ class DoubleArrayTrie:
             begin = pos - siblings[0].code
 
             if self.alloc_size <= (begin + siblings[-1].code):
-                if 1.05 > 1.0 * self.keySize / (self.progress + 1):
+                if 1.05 > 1.0 * self.key_size / (self.progress + 1):
                     l = 1.05
                 else:
-                    l = 1.0 * self.keySize / (self.progress + 1)
+                    l = 1.0 * self.key_size / (self.progress + 1)
                 self.resize(int(self.alloc_size * l))
 
             if self.used[begin]:
@@ -205,7 +213,7 @@ class DoubleArrayTrie:
 
         self.key = key
         self.length = length
-        self.keySize = keysize if keysize is not None else key.__len__()
+        self.key_size = keysize if keysize is not None else key.__len__()
         self.value = None
         self.v = v if v is not None else key
         self.progress = 0
@@ -215,7 +223,7 @@ class DoubleArrayTrie:
         self.base[0] = 1
         self.next_check_pos = 0
 
-        root_node = Node(left=0, right=self.keySize, depth=0, code=0)
+        root_node = Node(left=0, right=self.key_size, depth=0, code=0)
 
         siblings = []
         self.fetch(root_node, siblings)
@@ -247,7 +255,6 @@ class DoubleArrayTrie:
         n = self.base[p]
         if b == self.check[p] and n < 0:
             result = -n - 1
-
         return result
 
     def get(self, word):
@@ -298,13 +305,13 @@ class DoubleArrayTrie:
     def save_to_ya(trie, filename):
         # trie.compress()
         import cPickle as Pickle
-        with open(filename, 'w') as f:
-            Pickle.dump(trie, f)
+        with open(filename, 'wb') as f:
+            Pickle.dump(trie, f, protocol=Pickle.HIGHEST_PROTOCOL)
             f.close()
 
     @staticmethod
     def load_bin(filename):
-        with open(filename, 'r') as f:
+        with open(filename, 'rb') as f:
             trie = Pickle.load(f)
             return trie
 
@@ -316,7 +323,7 @@ class DoubleArrayTrie:
             filenames = [filenames]
 
         for filename in filenames:
-            with codecs.open(filename, 'r', 'utf-8') as f:
+            with codecs.open(filename, 'rb', 'utf-8') as f:
                 dict_list += f.read().splitlines()
 
         return DoubleArrayTrie.load_from_list(dict_list, key_func, value_func, enum_cls)

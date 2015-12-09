@@ -25,15 +25,15 @@ def recognition(vertexs, wordnet_optimum, wordnet_all):
     tag_str = [str(x) for x in tag_list]
     tag_str = ''.join(tag_str)
 
-    #
-    parse_pattern(tag_str, vertexs, None, None)
+    # 处理V、U的特殊情况
+    tag_str, vertexs = parse_pattern(tag_str, vertexs, None, None)
 
     search = Searcher(NRPatternDict().trie, tag_str)
-    vertexs_offset = [0] * len(vertexs)
+    vertexs_offset = [0 for i in range(len(vertexs))]
     offset = 0
-    for i in range(1, len(vertexs) - 2):
-        vertexs_offset[i] = offset
-        offset += len(vertexs[i].real_word)
+    vertexs_offset[1] = 1
+    for i in range(2, len(vertexs) - 2):
+        vertexs_offset[i] = vertexs_offset[i - 1] + len(vertexs[i - 1].real_word)
     while search.next():
         name_str = ""
         for i in range(search.begin, search.begin + len(search.value)):
@@ -41,25 +41,23 @@ def recognition(vertexs, wordnet_optimum, wordnet_all):
 
         # 添加到词网内
         vertex = Vertex(name_str, attribute="nr 1")
-        wordnet_optimum.add(vertexs_offset[search.begin + 1], vertex)
-        # vertexs = viterbi(wordnet_optimum.vertexs)
-        # return vertexs
+        wordnet_optimum.insert(vertexs_offset[search.begin], vertex, wordnet_all)
+
 
 
 def role_tag(word_seg_list):
     tag_index_list = []
     for vertex in word_seg_list:
-        if vertex.nature == NATURE.nr.index and vertex.attribute.total_frequency <= 1000:
+        if vertex.nature == NATURE.nr and vertex.attribute.total_frequency <= 1000:
             if vertex.real_word.__len__() == 2:
-                tag_index_list.append(Attribute("%s %s 1 %s 1" % (vertex.real_word, NR.X, NR.G), NR))
+                tag_index_list.append(Attribute(attr=(NR.X, 1, NR.G, 1), cls=NR))
                 continue
+
         index, value = PersonDict().trie.get(vertex.real_word)
+
         if value is None:
             value = Attribute([str(NR.A), PersonDict().matrix.get_total_freq(NR.A)], cls=NR)
-        # else:
-        #     if not isinstance(value, list):
-        #         value = value.split()
-        #     value = Attribute(value[1:], cls=NR)
+
         tag_index_list.append(value)
     return tag_index_list
 
@@ -88,5 +86,4 @@ def parse_pattern(tag_str, vertexs, wordnet_optimum, wordnet_all):
         else:
             new_tag_list.append(t)
             new_vertexs.append(vertexs[i])
-    vertexs = new_vertexs
-    tag_str = "".join(new_tag_list)
+    return "".join(new_tag_list), new_vertexs
