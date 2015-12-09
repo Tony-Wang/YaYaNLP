@@ -15,13 +15,13 @@ setup(
     description=DESCRIPTION,
     author=AUTHOR,
     author_email=AUTHOR_EMAIL,
-    license="BSD",
+    license="Apache",
     url=URL,
     packages=find_packages(include=["yaya*", "demo*"], exclude=["test*", "data*"]),
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 0.1.1 - Alpha',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: MIT License',
+        'License :: OSI Approved :: Apache License Version 2.0',
         'Programming Language :: Python',
     ],
 
