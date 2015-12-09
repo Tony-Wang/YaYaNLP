@@ -1,6 +1,7 @@
 # coding=utf-8
 from __future__ import absolute_import
 import math
+import copy
 
 from yaya.collection.dict import *
 from yaya.common.nature import NATURE
@@ -181,7 +182,8 @@ def dump_vertexs(vertexs):
 
 class WordNet:
     def __init__(self, text=None, vertexs=None):
-        self.vertexs = [[]] * (len(text) + 2)
+        self.vertexs = [[] for i in range(len(text) + 2)]
+        self.size = 2
         if vertexs is not None:
             i = 1
             for v in vertexs[1:-1]:
@@ -189,11 +191,24 @@ class WordNet:
                 i += v.real_word.__len__()
             self.vertexs[0] = [vertexs[0]]
             self.vertexs[-1] = [vertexs[-1]]
-
         else:
             self.vertexs[0] = [new_tag_vertex(TAG_BIGIN)]
             self.vertexs[-1] = [new_tag_vertex(TAG_END)]
         pass
+
+    def get_first(self, line):
+        if self.vertexs[line].__len__() > 0:
+            return self.vertexs[line][0]
+        else:
+            return None
+
+    def get(self, line, word_length=None):
+        if word_length is None:
+            return self.vertexs[line]
+        for v in self.vertexs[line]:
+            if len(v.real_word) == word_length:
+                return v
+        return None
 
     def add(self, line, vertex):
         for v in self.vertexs[line]:
@@ -203,6 +218,41 @@ class WordNet:
             self.vertexs[line] = [vertex]
         else:
             self.vertexs[line].append(vertex)
+        self.size += 1
+
+    def insert(self, line, vertex, word_net):
+        self.add(line, vertex)
+        # 保证连接性
+        for l in range(line - 1, 1, -1):
+            if self.get(l, 1) is None:
+                first = word_net.get_first(l)
+                if first is None:
+                    return
+                self.vertexs[l].append(copy.deepcopy(first))
+                self.size += 1
+                if len(self.vertexs) > 1:
+                    break
+            else:
+                break
+        l = line + len(vertex.real_word)
+        if len(self.get(l)) == 0:
+            target_line = word_net.get(l)
+            if target_line is None or len(target_line) == 0:
+                return
+            self.vertexs[l] = copy.deepcopy(target_line)
+            self.size += len(self.vertexs[l])
+
+        for l in range(l, len(self.vertexs)):
+            if self.get(l).__len__() == 0:
+                first = word_net.get_first(l)
+                if first is None:
+                    break
+                self.vertexs[l].append(copy.deepcopy(first))
+                self.size += 1
+                if self.vertexs[l].__len__() > 1:
+                    break
+            else:
+                break
 
     def add_atoms(self, line, atom_list):
         offset = 0

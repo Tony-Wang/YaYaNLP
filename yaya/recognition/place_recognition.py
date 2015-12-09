@@ -31,7 +31,7 @@ def recognition(vertexs, wordnet_optimum, wordnet_all):
 
         # 添加到词网内
         vertex = Vertex(name_str, attribute="ns 1")
-        wordnet_optimum.add(vertexs_offset[search.begin + 1], vertex)
+        wordnet_optimum.insert(vertexs_offset[search.begin + 1], vertex, wordnet_all)
 
 
 def role_tag(word_seg_list):

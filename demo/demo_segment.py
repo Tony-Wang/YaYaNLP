@@ -10,14 +10,14 @@ def print_terms(terms):
 
 
 def main():
+
     # 识别歧意词
     text = u"龚学平等领导说,邓颖超生前杜绝超生"
     terms = segment.seg(text)
     print_terms(terms)
 
-    return
     # 识别人名
-    text = u"签约仪式前，秦光荣、李纪恒、仇和、王春桂等一同会见了参加签约的企业家。"
+    text = u"签约仪式前，秦光荣、李纪恒、仇和等一同会见了参加签约的企业家。"
     terms = segment.seg(text)
     print_terms(terms)
 

@@ -1,6 +1,7 @@
 # coding=utf-8
 __author__ = 'tony'
 from unittest import TestCase
+
 from yaya.recognition import person_recognition
 from yaya.recognition import place_recognition
 from yaya.recognition import organization_recognition
@@ -29,7 +30,7 @@ class TestOrgRecognition(TestCase):
         person_recognition.recognition(self.vertexs, self.word_net_optimum, self.word_net)
         place_recognition.recognition(self.vertexs, self.word_net_optimum, self.word_net)
         word_net_optimum = WordNet(self.text, vertexs=self.vertexs)
-        organization_recognition.recognition(self.vertexs, word_net_optimum, self.word_net)
-        vertexs = viterbi(word_net_optimum.vertexs)
+        vertexs = organization_recognition.recognition(self.vertexs, word_net_optimum, self.word_net)
+        # viterbi(word_net_optimum.vertexs)
         dump_vertexs(vertexs)
         self.assertIn(Vertex(u"济南杨铭宇餐饮管理有限公司", attribute=u"nt 1"), vertexs)

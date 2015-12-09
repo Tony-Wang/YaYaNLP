@@ -25,8 +25,8 @@ def recognition(vertexs, wordnet_optimum, wordnet_all):
     tag_str = [str(x) for x in tag_list]
     tag_str = ''.join(tag_str)
 
-    #
-    parse_pattern(tag_str, vertexs, None, None)
+    # 处理V、U的特殊情况
+    tag_str, vertexs = parse_pattern(tag_str, vertexs, None, None)
 
     search = Searcher(NRPatternDict().trie, tag_str)
     vertexs_offset = [0] * len(vertexs)
@@ -41,9 +41,8 @@ def recognition(vertexs, wordnet_optimum, wordnet_all):
 
         # 添加到词网内
         vertex = Vertex(name_str, attribute="nr 1")
-        wordnet_optimum.add(vertexs_offset[search.begin + 1], vertex)
-        # vertexs = viterbi(wordnet_optimum.vertexs)
-        # return vertexs
+        wordnet_optimum.insert(vertexs_offset[search.begin + 1], vertex, wordnet_all)
+
 
 
 def role_tag(word_seg_list):
@@ -51,7 +50,7 @@ def role_tag(word_seg_list):
     for vertex in word_seg_list:
         if vertex.nature == NATURE.nr.index and vertex.attribute.total_frequency <= 1000:
             if vertex.real_word.__len__() == 2:
-                tag_index_list.append(Attribute("%s %s 1 %s 1" % (vertex.real_word, NR.X, NR.G), NR))
+                tag_index_list.append(Attribute("%s %s 1 %s 1" % (vertex.real_word, NR.X, NR.G), cls=NR))
                 continue
         index, value = PersonDict().trie.get(vertex.real_word)
         if value is None:
@@ -88,5 +87,4 @@ def parse_pattern(tag_str, vertexs, wordnet_optimum, wordnet_all):
         else:
             new_tag_list.append(t)
             new_vertexs.append(vertexs[i])
-    vertexs = new_vertexs
-    tag_str = "".join(new_tag_list)
+    return "".join(new_tag_list), new_vertexs
