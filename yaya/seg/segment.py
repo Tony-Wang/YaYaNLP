@@ -47,7 +47,7 @@ def vertexs_to_terms(vertexs, word_only=False):
 #     return [v for v in vertexs if v is not None]
 
 
-def seg(text):
+def seg_to_vertexs(text):
     word_net = WordNet(text)
 
     # 粗分词网
@@ -76,13 +76,17 @@ def seg(text):
     vertexs = viterbi(word_net_optimum.vertexs)
 
     if Config.org_recognize:
+        word_net_optimum = WordNet(text, vertexs=vertexs)
         vertexs = organization_recognition.recognition(vertexs, word_net_optimum, word_net)
 
     if Config.debug:
         print(u"打印人组织识别词网：")
         print(unicode(word_net_optimum))
+    return vertexs
 
-    return vertexs_to_terms(vertexs)
+
+def seg(vertexs):
+    return vertexs_to_terms(seg_to_vertexs(vertexs))
 
 
 def simplified_to_traditional(text):

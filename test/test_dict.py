@@ -53,10 +53,7 @@ class TestDoubleArrayTrie(TestCase):
         self.assertEqual(trie.get(u"阿拉伯")[1].nature, NATURE.n)
 
     def test_load_dict(self):
-        trie = DoubleArrayTrie()
-        trie.build(key=[u"注册", u"注册机"], v=[['n', 1], ['n', 2]])
         new_trie = DoubleArrayTrie.load_dict_file("./data/test.txt")
-        self.assertGreater(trie.exact_match_search(u"注册机"), 0)
         self.assertGreater(new_trie.exact_match_search(u"注册机"), 0)
 
     def test_load_big(self):
