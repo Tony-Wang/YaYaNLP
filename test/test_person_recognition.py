@@ -30,8 +30,10 @@ class TestPersonRecognition(TestCase):
         print(vertexs)
 
     def test_person_name_V_should_split_to_EL_DL(self):
-        text = u"龚学平等领导说,邓颖超生前杜绝超生"
+        text = u"龚学平、张晓辉等领导说,邓颖超生前杜绝超生"
         vertexs = segment.seg_to_vertexs(text)
         terms = segment.vertexs_to_terms(vertexs, True)
         self.assertIn(u"龚学平", terms)
+        self.assertIn(u"张晓辉", terms)
+        self.assertIn(u"邓颖超", terms)
 
