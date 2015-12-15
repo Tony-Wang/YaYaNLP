@@ -1,5 +1,6 @@
 # -*- coding:utf-8 -*-
 from __future__ import absolute_import, unicode_literals
+import os
 from unittest import TestCase
 
 from yaya.collection.dict import *
@@ -53,7 +54,7 @@ class TestDoubleArrayTrie(TestCase):
         self.assertEqual(trie.get(u"阿拉伯")[1].nature, NATURE.n)
 
     def test_load_dict(self):
-        new_trie = DoubleArrayTrie.load_dict_file("./data/test.txt")
+        new_trie = DoubleArrayTrie.load_dict_file(os.path.join("data", "test.txt"))
         self.assertGreater(new_trie.exact_match_search(u"注册机"), 0)
 
     def test_load_big(self):
@@ -63,7 +64,7 @@ class TestDoubleArrayTrie(TestCase):
 
 
     def test_search(self):
-        trie = DoubleArrayTrie.load("./data/test.txt")
+        trie = DoubleArrayTrie.load(os.path.join("data", "test.txt"))
         self.assertGreaterEqual(u"一举", 0, u"词典中含有")
         self.assertGreaterEqual(u"一举成名", 0, u"词典中含有")
         self.assertGreaterEqual(u"一举成名天下知", 0, u"词典中含有")
@@ -72,7 +73,7 @@ class TestDoubleArrayTrie(TestCase):
             print(search.value)
 
     def test_searcher_generator(self):
-        trie = DoubleArrayTrie.load("./data/test.txt")
+        trie = DoubleArrayTrie.load(os.path.join("data", "test.txt"))
         self.assertGreaterEqual(u"一举", 0, u"词典中含有")
         self.assertGreaterEqual(u"一举成名", 0, u"词典中含有")
         self.assertGreaterEqual(u"一举成名天下知", 0, u"词典中含有")
@@ -91,7 +92,7 @@ class TestDoubleArrayTrie(TestCase):
         self.assertGreaterEqual(CustomDict().trie.exact_match_search(u"黄勇"), 0)
 
     def test_dat_transition(self):
-        trie = DoubleArrayTrie.load("./data/test.txt")
+        trie = DoubleArrayTrie.load(os.path.join("data", "test.txt"))
         self.assertNotEqual(trie.transition(u"法兰西", 1), -1)
         self.assertEqual(trie.transition(u"法兰东", 1), -1)
         p = trie.transition(u"法兰", 1)

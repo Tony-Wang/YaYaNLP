@@ -305,13 +305,13 @@ class DoubleArrayTrie:
     def save_to_ya(trie, filename):
         # trie.compress()
         import cPickle as Pickle
-        with open(filename, 'w') as f:
+        with open(filename, 'wb') as f:
             Pickle.dump(trie, f, protocol=Pickle.HIGHEST_PROTOCOL)
             f.close()
 
     @staticmethod
     def load_bin(filename):
-        with open(filename, 'r') as f:
+        with open(filename, 'rb') as f:
             trie = Pickle.load(f)
             return trie
 
@@ -323,7 +323,7 @@ class DoubleArrayTrie:
             filenames = [filenames]
 
         for filename in filenames:
-            with codecs.open(filename, 'r', 'utf-8') as f:
+            with codecs.open(filename, 'rb', 'utf-8') as f:
                 dict_list += f.read().splitlines()
 
         return DoubleArrayTrie.load_from_list(dict_list, key_func, value_func, enum_cls)
