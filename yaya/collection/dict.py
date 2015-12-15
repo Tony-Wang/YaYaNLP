@@ -22,15 +22,22 @@ class Attribute(object):
     def __init__(self, attr, cls=NATURE):
         self.cls = cls
         self.total = 0
-        self.data = ()
-        if attr is not None:
-            attr = attr if isinstance(attr, list) else attr.split(' ')
-            nature = []
-            for i in range(0, attr.__len__(), 2):
-                nature.append(cls[attr[i]])
-                nature.append(int(attr[i + 1]))
-                self.total += int(attr[i + 1])
-            self.data = tuple(nature)
+        if not isinstance(attr, tuple):
+            self.data = ()
+            if attr is not None:
+                attr = attr if isinstance(attr, list) else attr.split(' ')
+                nature = []
+                for i in range(0, attr.__len__(), 2):
+                    nature.append(cls[attr[i]])
+                    nature.append(int(attr[i + 1]))
+                    self.total += int(attr[i + 1])
+                self.data = tuple(nature)
+        else:
+            self.data = attr
+            for i in range(len(self.data)):
+                if i % 2 == 1:
+                    self.total += self.data[i]
+
     def to_tuple(self):
         return self.data
 

@@ -56,7 +56,7 @@ def role_tag(word_seg_list):
             tag_index_list.append(Attribute([str(NT.K), 1000, str(NT.D), 1000], cls=NT))
             continue
         elif nature == NATURE.m:
-            tag_index_list.append((NT.M, 1000))
+            tag_index_list.append(Attribute([str(NT.M), 1000], cls=NT))
             continue
 
         index, value = OrgDict().trie.get(vertex.word)

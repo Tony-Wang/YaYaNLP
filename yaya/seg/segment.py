@@ -85,9 +85,13 @@ def seg_to_vertexs(text):
     return vertexs
 
 
-def seg(vertexs):
-    return vertexs_to_terms(seg_to_vertexs(vertexs))
+def seg(text):
+    return vertexs_to_terms(seg_to_vertexs(text))
 
+
+def traditional_seg(text):
+    simplified = TraditionalChineseDict().convert_traditional_to_simplified(text)
+    return seg(simplified)
 
 def simplified_to_traditional(text):
     return SimplifiedChineseDict().convert_simplified_to_traditional(text)
