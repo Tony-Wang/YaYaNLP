@@ -33,6 +33,7 @@ class SimplifiedChineseDict(ChinseTraditionalBaseDict):
                                          lambda i: i[i.find(u'=') + 1:],
                                          lambda i: i.split('=')[::-1],
                                          dict_bin_ext=config.DICT_BIN_REVERSE_EXT)
+        self.trie.get_attr = lambda v: v
 
     def convert_simplified_to_traditional(self, text):
         return self.convert_key_to_value(text)
@@ -44,6 +45,7 @@ class TraditionalChineseDict(ChinseTraditionalBaseDict):
         self.trie = DoubleArrayTrie.load(config.TRADITIONAL_CHINESE_DICT_NAME,
                                          lambda i: i[:i.find(u'=')],
                                          lambda i: i.split('='))
+        self.trie.get_attr = lambda v: v
 
     def convert_traditional_to_simplified(self, text):
         return self.convert_key_to_value(text)

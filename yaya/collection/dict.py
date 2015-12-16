@@ -50,6 +50,9 @@ class Attribute(object):
     def __len__(self):
         return len(self.data) / 2
 
+    def __eq__(self, other):
+        return str(self) == str(other)
+
     def get_nature_frequency(self, nature):
         try:
             return self.data[self.data.index(nature) + 1]
@@ -75,11 +78,11 @@ class Attribute(object):
 
 
 class DoubleArrayTrie:
-    def __init__(self):
+    def __init__(self, enum_cls=NATURE):
         self.alloc_size = 0
         self.check = []
         self.base = []
-
+        self.enum_cls = enum_cls
         self.used = []
         self.size = 0
         self.key = []
@@ -260,9 +263,16 @@ class DoubleArrayTrie:
     def get(self, word):
         index = self.exact_match_search(word)
         if index >= 0:
-            return index, self.v[index]
+            return index, self.get_attr(self.v[index])
         else:
             return index, None
+
+    def get_attr(self, value):
+        if isinstance(value, unicode) or isinstance(value, str):
+            return Attribute(value.split(chr(32))[1:], cls=self.enum_cls)
+        elif isinstance(value, list):
+            return Attribute(value[1:], cls=self.enum_cls)
+        raise Exception("异常的字典值类型:%s" % type(value))
 
     # def get_attribute(self, key):
     #     index, value = self.get(key)
@@ -286,7 +296,7 @@ class DoubleArrayTrie:
             return None
         n = self.base[state]
         if state == self.check[state] and n < 0:
-            return self.v[-n - 1]
+            return self.get_attr(self.v[-n - 1])
         return None
 
     def dump(self):
@@ -331,7 +341,7 @@ class DoubleArrayTrie:
     @staticmethod
     def load_from_list(dict_list, key_func=None, value_func=None, enum_cls=NATURE):
         key_func = key_func or (lambda i: i.split()[0])
-        value_func = value_func or (lambda i: Attribute(i.split(chr(32))[1:], cls=enum_cls))
+        value_func = value_func or (lambda i: i)
         # sort
         dict_map = {}
         for i in dict_list:
@@ -341,7 +351,7 @@ class DoubleArrayTrie:
             i = i.replace('\t', chr(32))
             dict_map[key_func(i)] = value_func(i)  # 此处需要解开成列表，viterbi会直接用到
         dict_map = OrderedDict(sorted(dict_map.items()))
-        trie = DoubleArrayTrie()
+        trie = DoubleArrayTrie(enum_cls=enum_cls)
         trie.build(key=dict_map.keys(), v=dict_map.values())
         return trie
 
@@ -423,7 +433,7 @@ class Searcher:
                 self.length = self.i - self.begin + 1
                 self.index = -n - 1
                 self.key = self.char_array[self.begin:self.begin + self.length]
-                self.value = self.trie.v[self.index]
+                self.value = self.trie.get_attr(self.trie.v[self.index])
                 self.last = b
                 return True
         return False
@@ -455,7 +465,7 @@ class Searcher:
                 self.length = self.i - self.begin + 1
                 self.index = -n - 1
                 self.key = self.char_array[self.begin:self.begin + self.length]
-                self.value = self.trie.v[self.index]
+                self.value = self.trie.get_attr(self.trie.v[self.index])
                 self.last = b
                 yield self.begin, self.key, self.value
         return

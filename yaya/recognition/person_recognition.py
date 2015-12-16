@@ -1,47 +1,51 @@
 # coding=utf-8
-from yaya.collection.dict import Attribute, Searcher
+from yaya.collection.dict import Attribute, PERSON_ATTRIBUTE
 from yaya.collection.hmm import PersonTranMatrix
 from yaya.common.nature import NATURE
 from yaya.common.nr import NR
-from yaya.config import Config
 from yaya.dictionary.person_dict import PersonDict, NRPatternDict
-from yaya.seg.viterbi import viterbi_template
+from yaya.recognition.recognition import role_viterbi
 from yaya.seg.wordnet import Vertex
 
 __author__ = 'tony'
 
 def recognition(vertexs, wordnet_optimum, wordnet_all):
-
-    # 识别角色，并进行一次维特比
-    tag_list = role_tag(vertexs)
-    if Config.debug:
-        sb = []
-        for i, v in enumerate(vertexs):
-            sb.append("[%s %s]" % (unicode(vertexs[i]), tag_list[i].nature))
-        print u"人名角色观察:%s" % "".join(sb)
-    tag_list = viterbi_template(tag_list, PersonTranMatrix().hmm)
-
-
-    tag_str = [str(x) for x in tag_list]
-    tag_str = ''.join(tag_str)
-
-    # 处理V、U的特殊情况
-    tag_str, vertexs = parse_pattern(tag_str, vertexs, None, None)
-
-    search = Searcher(NRPatternDict().trie, tag_str)
-    vertexs_offset = [0 for i in range(len(vertexs))]
-    offset = 0
-    vertexs_offset[1] = 1
-    for i in range(2, len(vertexs) - 2):
-        vertexs_offset[i] = vertexs_offset[i - 1] + len(vertexs[i - 1].real_word)
-    while search.next():
-        name_str = ""
-        for i in range(search.begin, search.begin + len(search.value)):
-            name_str += vertexs[i].real_word
-
-        # 添加到词网内
-        vertex = Vertex(name_str, attribute="nr 1")
-        wordnet_optimum.insert(vertexs_offset[search.begin], vertex, wordnet_all)
+    return role_viterbi(vertexs, wordnet_optimum,
+                        hmm=PersonTranMatrix().hmm,
+                        trie=NRPatternDict().trie,
+                        recognition_attr=PERSON_ATTRIBUTE,
+                        tag_func=role_tag
+                        )
+    # # 识别角色，并进行一次维特比
+    # tag_list = role_tag(vertexs)
+    # if Config.debug:
+    #     sb = []
+    #     for i, v in enumerate(vertexs):
+    #         sb.append("[%s %s]" % (unicode(vertexs[i]), tag_list[i].nature))
+    #     print u"人名角色观察:%s" % "".join(sb)
+    # tag_list = viterbi_template(tag_list, PersonTranMatrix().hmm)
+    #
+    #
+    # tag_str = [str(x) for x in tag_list]
+    # tag_str = ''.join(tag_str)
+    #
+    # # 处理V、U的特殊情况
+    # tag_str, vertexs = parse_pattern(tag_str, vertexs, None, None)
+    #
+    # search = Searcher(NRPatternDict().trie, tag_str)
+    # vertexs_offset = [0 for i in range(len(vertexs))]
+    # offset = 0
+    # vertexs_offset[1] = 1
+    # for i in range(2, len(vertexs) - 2):
+    #     vertexs_offset[i] = vertexs_offset[i - 1] + len(vertexs[i - 1].real_word)
+    # while search.next():
+    #     name_str = ""
+    #     for i in range(search.begin, search.begin + len(search.key)):
+    #         name_str += vertexs[i].real_word
+    #
+    #     # 添加到词网内
+    #     vertex = Vertex(name_str, attribute="nr 1")
+    #     wordnet_optimum.insert(vertexs_offset[search.begin], vertex, wordnet_all)
 
 
 
