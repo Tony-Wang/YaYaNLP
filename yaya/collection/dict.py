@@ -455,7 +455,7 @@ class Searcher:
             else:
                 self.i = self.begin  # 转移失败，也将起点往前挪一个，重新开始，状态归零
                 self.begin += 1
-                if self.begin is self.array_length:
+                if self.begin == self.array_length:
                     break
                 b = self.trie.base[0]
                 continue
