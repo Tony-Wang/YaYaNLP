@@ -30,7 +30,7 @@ YaYaNLP使用了与HanLP兼容的字典数据，而编译后的字典数据保�
 
 ### 配置数据文件路径
 
-在**yaya/const.py**修改自己的数据文件路径
+在**yaya/config.py**修改自己的数据文件路径
 ``` python
 DATA_ROOT = "/your/data/path"
 ```
