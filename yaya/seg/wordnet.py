@@ -6,7 +6,7 @@ import copy
 from yaya.collection.dict import *
 from yaya.common.nature import NATURE
 from yaya.utility.chartype import *
-from yaya.collection.bigram import CoreBiGramTable
+from yaya.collection.bigram import CORE_BIG_RAM_TABLE
 from yaya.const import *
 
 __author__ = 'tony'
@@ -67,7 +67,7 @@ class Vertex:
         freq = vertex_p.attribute.total_frequency
         if freq == 0:
             freq = 1
-        two_word_freq = CoreBiGramTable().table.get_bifreq(vertex_p.word_id, vertex_n.word_id)
+        two_word_freq = CORE_BIG_RAM_TABLE.table.get_bifreq(vertex_p.word_id, vertex_n.word_id)
         value = -math.log(SMOOTHING_PARAM * freq / MAX_FREQUENCY + (1 - SMOOTHING_PARAM) *
                           ((1 - SMOOTHING_FACTOR) * two_word_freq / freq + SMOOTHING_FACTOR))
         if value < 0:
@@ -187,6 +187,7 @@ class WordNet:
         if vertexs is not None:
             i = 1
             for v in vertexs[1:-1]:
+                v.vertex_from = None
                 self.vertexs[i]=[v]
                 i += v.real_word.__len__()
             self.vertexs[0] = [vertexs[0]]
@@ -280,7 +281,7 @@ class WordNet:
         sb = []
         sb.append("=" * 30)
         for i, vl in enumerate(self.vertexs):
-            sb.append(u"[%d]:%s" % (i, u",".join([unicode(v) for v in vl])))
+            sb.append(u"[%d]:[%s]" % (i, u",".join([v.real_word for v in vl])))
         sb.append("=" * 30)
         return u"\n".join(sb)
 

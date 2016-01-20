@@ -1,6 +1,8 @@
 # coding=utf-8
 from unittest import TestCase
 
+from yaya.collection.hmm import OrgTranMatrix
+from yaya.common.nt import NT
 from yaya.seg.segment import vertexs_to_terms
 from yaya.seg.viterbi import *
 from yaya.seg.wordnet import *
@@ -47,4 +49,16 @@ class TestViterbiSegment(TestCase):
 
 class TestViterbi(TestCase):
     def test_computer(self):
-        pass
+        node_list = []
+        node_list.append(Attribute((NT.S, 19800)))
+        node_list.append(Attribute((NT.K, 1000, NT.D, 1000)))
+        node_list.append(Attribute((NT.C, 1000, NT.B, 1000)))
+        node_list.append(Attribute((NT.M, 1000)))
+        node_list.append(Attribute((NT.P, 12, NT.D, 1)))
+        node_list.append(Attribute((NT.B, 19800)))
+        tag_list = viterbi_standard(node_list, hmm=OrgTranMatrix().hmm)
+        self.assertEquals(6, len(tag_list))
+        self.assertEqual(NT.K, tag_list[1])
+        self.assertEqual(NT.C, tag_list[2])
+        self.assertEqual(NT.M, tag_list[3])
+        self.assertEqual(NT.D, tag_list[4])

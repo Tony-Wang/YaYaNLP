@@ -5,6 +5,7 @@ from yaya.common.nature import NATURE
 from yaya.common.nt import NT
 from yaya.dictionary.org_dict import NTPatternDict, OrgDict
 from yaya.recognition.recognition import role_viterbi
+from yaya.seg.viterbi import viterbi_standard
 
 __author__ = 'tony'
 
@@ -15,7 +16,8 @@ def recognition(vertexs, wordnet_optimum, wordnet_all):
                         hmm=OrgTranMatrix().hmm,
                         trie=NTPatternDict().trie,
                         recognition_attr=ORG_ATTRIBUTE,
-                        tag_func=role_tag
+                        tag_func=role_tag,
+                        viterbi_fun=viterbi_standard
                         )
 
 def role_tag(word_seg_list):

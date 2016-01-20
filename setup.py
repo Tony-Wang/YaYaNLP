@@ -17,7 +17,7 @@ setup(
     author_email=AUTHOR_EMAIL,
     license="Apache",
     url=URL,
-    packages=find_packages(include=["yaya*", "demo*"], exclude=["test*", "data*"]),
+    packages=find_packages(exclude=["test*", "data*"]),
     classifiers=[
         'Development Status :: 0.1.1 - Alpha',
         'Intended Audience :: Developers',

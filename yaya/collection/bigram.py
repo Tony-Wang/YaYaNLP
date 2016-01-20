@@ -122,3 +122,6 @@ def binary_search(a, from_index, length, key):
 class CoreBiGramTable:
     def __init__(self):
         self.table = BiGramTable.load()
+
+
+CORE_BIG_RAM_TABLE = CoreBiGramTable()

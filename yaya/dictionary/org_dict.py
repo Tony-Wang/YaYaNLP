@@ -14,8 +14,6 @@ class OrgDict:
         self.matrix = HMMMatrix.load(config.ORG_TR_PATH, NT)
 
 
-
-
 @singleton
 class NTPatternDict:
     def __init__(self):

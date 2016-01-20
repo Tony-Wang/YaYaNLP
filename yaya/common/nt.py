@@ -417,6 +417,7 @@ NTPattern = [
     "FKCJD",
     "FLD",
     "FLPCD",
+    "FMD",
     "FPCCCD",
     "FPCD",
     "FPD",

@@ -2,13 +2,25 @@
 from yaya.collection.dict import Searcher
 from yaya.seg.viterbi import viterbi, viterbi_template
 from yaya.seg.wordnet import Vertex
-
+from yaya.config import Config
 __author__ = 'tony'
 
 
-def role_viterbi(vertexs, wordnet_optimum, hmm, trie, recognition_attr, tag_func):
+def role_viterbi(vertexs, wordnet_optimum, hmm, trie, recognition_attr, tag_func, viterbi_fun=viterbi_template):
     tag_list = tag_func(vertexs)
-    tag_list = viterbi_template(tag_list, hmm)
+    if Config.debug:
+        sb = []
+        for i, tag in enumerate(tag_list):
+            sb.append(u"[ %s %s ]" % (vertexs[i].real_word, tag))
+        print u"角色观察: %s" % u"".join(sb)
+
+    tag_list = viterbi_fun(tag_list, hmm)
+    if Config.debug:
+        sb = []
+        for i, tag in enumerate(tag_list):
+            sb.append(u"%s/%s" % (vertexs[i].real_word, tag))
+        print(u"角色标注:[%s]" % u", ".join(sb))
+
     tag_str = [str(x) for x in tag_list]
     tag_str = ''.join(tag_str)
     search = Searcher(trie, tag_str)

@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 import math
 
 from yaya.const import DOUBLE_MAX
+from yaya.config import Config
 
 __author__ = 'tony'
 
@@ -74,7 +75,7 @@ def viterbi_roletag(roletaglist, hmm):
     for i in xrange(1, _length):
         perfect_cost = DOUBLE_MAX
         item = roletaglist[i]
-        for nature, freq in item.natures:
+        for i, nature, freq in item.natures:
             _now = hmm.trans_prob[_pre_nature.index][nature.index] - math.log((item.get_nature_frequency(nature)+1e-8) / hmm.get_total_freq(nature))
             if perfect_cost > _now:
                 perfect_cost = _now
@@ -90,9 +91,9 @@ def viterbi_template(node_list, hmm, init_cost=DOUBLE_MAX):
     _pre_nature = node_list[0].nature
     _perfect_nature = _pre_nature
     taglist.append(_pre_nature)
-    for i,cur_node in enumerate(node_list[1:]):
+    for i, cur_node in enumerate(node_list[1:]):
         perfect_cost = init_cost
-        for vertex, freq in cur_node.natures:
+        for j, vertex, freq in cur_node.natures:
             _now = hmm.trans_prob[_pre_nature.index][vertex.index] - math.log(
                 (cur_node.get_nature_frequency(vertex) + 1e-8) / hmm.get_total_freq(vertex))
             if perfect_cost > _now:
@@ -100,5 +101,50 @@ def viterbi_template(node_list, hmm, init_cost=DOUBLE_MAX):
                 _perfect_nature = vertex
         _pre_nature = _perfect_nature
         taglist.append(_pre_nature)
+    return taglist
+
+
+def viterbi_standard(node_list, hmm, init_cost=DOUBLE_MAX):
+    node_count = len(node_list)
+    taglist = []
+    # 得到第一个元素的第一个标签的词性
+    route_cost = []
+    _pre_nature = node_list[0].nature
+    _perfect_nature = _pre_nature
+    taglist.append(_pre_nature)
+
+    # 计算第2个元素
+    current_line = node_list[1]
+    for i, vertex, freq in current_line.natures:
+        _now = hmm.trans_prob[_pre_nature.index][vertex.index] - math.log(
+            (current_line.get_nature_frequency(vertex) + 1e-8) / hmm.get_total_freq(vertex))
+        route_cost.append(_now)
+    pre_line = current_line
+
+    # 计算第三个元素
+    for i, current_line in enumerate(node_list[2:]):
+        new_route_cost = []
+        perfect_pre_nature = None
+        perfect_cost = init_cost
+        for k, cur_nature, cur_freq in current_line.natures:
+            new_route_cost.append(init_cost)
+            for j, pre_nature, pre_freq in pre_line.natures:
+                assert j < len(route_cost)
+
+                _now = route_cost[j] + hmm.trans_prob[pre_nature.index][cur_nature.index] - math.log(
+                    (current_line.get_nature_frequency(cur_nature) + 1e-8) / hmm.get_total_freq(cur_nature))
+
+                if new_route_cost[k] > _now:
+                    new_route_cost[k] = _now
+                    if perfect_cost > _now:
+                        perfect_cost = _now
+                        perfect_pre_nature = pre_nature
+
+        pre_line = current_line
+        route_cost = new_route_cost
+        if Config.debug:
+            print new_route_cost
+        taglist.append(perfect_pre_nature)
+    taglist.append(cur_nature)
     return taglist
 

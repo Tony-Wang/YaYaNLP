@@ -146,7 +146,7 @@ class Enum(object):
 
     def __getitem__(self, index):
         # tony 添加，添加从字符型枚举名到变量值的转换
-        if isinstance(index, basestring):
+        if isinstance(index, str) or isinstance(index, unicode) :
             return self.__getattribute__(index)
         else:
             return self._values[index]

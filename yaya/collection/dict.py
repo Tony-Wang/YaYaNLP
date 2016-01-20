@@ -1,5 +1,13 @@
 # -*- coding:utf-8 -*-
-import cPickle as Pickle
+try:
+    import cPickle as Pickle
+except:
+    import Pickle
+try:
+    import xrange as range
+except:
+    pass
+
 from collections import OrderedDict
 
 from yaya.const import *
@@ -62,7 +70,7 @@ class Attribute(object):
     @property
     def natures(self):
         for i in range(0, len(self.data), 2):
-            yield self.data[i], self.data[i + 1]
+            yield i / 2, self.data[i], self.data[i + 1]
             # return self.data
 
     @property
@@ -75,6 +83,28 @@ class Attribute(object):
     @property
     def total_frequency(self):
         return self.total
+
+
+class FastArray:
+    def __init__(self, default_value=0):
+        self.default_value = 0
+        self.data = {}
+        self._max_key = 0
+        pass
+
+    def __getitem__(self, item):
+        return self.data.get(item, 0)
+
+    def __setitem__(self, key, value):
+        self.data[key] = value
+        self._max_key = max(self._max_key, key)
+
+    @property
+    def max_key(self):
+        return self._max_key
+
+    def extend(self, size):
+        pass
 
 
 class DoubleArrayTrie:
@@ -107,12 +137,11 @@ class DoubleArrayTrie:
         self.used.extend([0] * offsize)
         self.alloc_size = newsize
 
-
     def fetch(self, parent, siblings):
         if self.error_ < 0:
             return 0
         prev = 0
-        for i in xrange(parent.left, parent.right):
+        for i in range(parent.left, parent.right):
             if parent.depth > (self.length[i] if self.length is not None else self.key[i].__len__()):
                 continue
             tmp = self.key[i]
@@ -174,7 +203,7 @@ class DoubleArrayTrie:
                 continue
 
             find = True
-            for i in xrange(siblings.__len__()):
+            for i in range(siblings.__len__()):
                 if self.check[begin + siblings[i].code] != 0:
                     find = False
                     break
@@ -189,10 +218,10 @@ class DoubleArrayTrie:
         self.size = self.size if (self.size > begin + siblings[-1].code + 1) else \
             begin + siblings[-1].code + 1
 
-        for i in xrange(siblings.__len__()):
+        for i in range(siblings.__len__()):
             self.check[begin + siblings[i].code] = begin
 
-        for i in xrange(siblings.__len__()):
+        for i in range(siblings.__len__()):
             new_siblings = []
 
             if self.fetch(siblings[i], new_siblings) is 0:
@@ -210,13 +239,14 @@ class DoubleArrayTrie:
 
         return begin
 
-    def build(self, key=None, length=None, keysize=None, v=None):
-        if keysize > key.__len__() or key is None:
+    def build(self, key=None, length=None, key_size=None, v=None):
+        if key is None:
             return 0
-
+        if key_size is not None and key_size > key.__len__():
+            return 0
         self.key = key
         self.length = length
-        self.key_size = keysize if keysize is not None else key.__len__()
+        self.key_size = key_size if key_size is not None else key.__len__()
         self.value = None
         self.v = v if v is not None else key
         self.progress = 0
@@ -247,7 +277,7 @@ class DoubleArrayTrie:
         result = -1
         b = self.base[nodepos]
 
-        for i in xrange(pos, keylen):
+        for i in range(pos, keylen):
             p = b + ord(key[i]) + 1
             if b == self.check[p]:
                 b = self.base[p]
@@ -273,12 +303,6 @@ class DoubleArrayTrie:
         elif isinstance(value, list):
             return Attribute(value[1:], cls=self.enum_cls)
         raise Exception("异常的字典值类型:%s" % type(value))
-
-    # def get_attribute(self, key):
-    #     index, value = self.get(key)
-    #     if value is not None:
-    #         value = Attribute(value[1:])
-    #     return value
 
     def transition(self, path, state_from):
         b = state_from
@@ -320,6 +344,10 @@ class DoubleArrayTrie:
             f.close()
 
     @staticmethod
+    def save_to_yaf(trie, filename):
+        pass
+
+    @staticmethod
     def load_bin(filename):
         with open(filename, 'rb') as f:
             trie = Pickle.load(f)
@@ -345,11 +373,12 @@ class DoubleArrayTrie:
         # sort
         dict_map = {}
         for i in dict_list:
-            # value = value_func(i)
-            # if isinstance(value, str):
-            #     value = value.split(chr(32))[1:]
-            i = i.replace('\t', chr(32))
-            dict_map[key_func(i)] = value_func(i)  # 此处需要解开成列表，viterbi会直接用到
+            try:
+                i = i.replace('\t', chr(32))
+                dict_map[key_func(i)] = value_func(i)  # 此处需要解开成列表，viterbi会直接用到
+            except:
+                logger.error(u"字典项:[ %s ]格式异常。" % i)
+                continue
         dict_map = OrderedDict(sorted(dict_map.items()))
         trie = DoubleArrayTrie(enum_cls=enum_cls)
         trie.build(key=dict_map.keys(), v=dict_map.values())
